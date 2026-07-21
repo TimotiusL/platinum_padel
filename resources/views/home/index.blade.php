@@ -31,58 +31,53 @@
         </a>
     </div>
     <div class="t-grid">
-        {{-- nanti foreach tournament --}}
+        @include('components.tournament-card')
     </div>
 </section>
 
 <section class="section">
     <div class="section-head">
         <div>
-            <div class="eyebrow">Latest Champions</div>
-            <h2>Finalist Pool</h2>
+            <div class="eyebrow">
+                Latest Champions
+            </div>
+            <h2>
+                Finalist Pool
+            </h2>
         </div>
-        <section class="section">
+    </div>
+    <div class="f-grid">
+        @include('components.finalist-card')
 
-            <div class="section-head">
+        @include('components.finalist-card')
 
-                <div>
+        @include('components.finalist-card')
 
-                    <div class="eyebrow">
-
-                        Latest Champions
-
-                    </div>
-
-                    <h2>
-
-                        Finalist Pool
-
-                    </h2>
-
-                </div>
-
-            </div>
-
-            <div class="f-grid">
-
-                {{-- nanti foreach finalists --}}
-
-            </div>
-
-        </section>
+        @include('components.finalist-card')
+    </div>
 </section>
 
 <section class="section">
     <div class="section-head">
         <div>
-            <div class="eyebrow">Archive</div>
-            <h2>History</h2>
+            <div class="eyebrow">
+                Archive
+            </div>
+            <h2>
+                History
+            </h2>
         </div>
-        <span class="see-all">${HISTORY.length} Turnamen</span>
+        <span class="see-all">
+            3 Tournaments
+        </span>
     </div>
     <div class="h-grid">
 
-        {{-- nanti history --}}
+        @include('components.history-card')
+
+        @include('components.history-card')
+
+        @include('components.history-card')
 
     </div>
 </section>
