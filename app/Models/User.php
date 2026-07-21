@@ -46,4 +46,14 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function player()
+    {
+        return $this->hasOne(Player::class);
+    }
+
+    public function tournaments()
+    {
+        return $this->hasMany(Tournament::class, 'created_by');
+    }
 }
