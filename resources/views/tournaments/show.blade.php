@@ -4,9 +4,9 @@
 
 @section('content')
 
-<a href="{{ route('tournaments.index') }}" class="back-link">Kembali ke Tournaments</a>
+<a href="{{ route('tournaments.index') }}" class="back-link">< Kembali ke Tournaments</a>
 <div class="t-banner">
-    <div class="poster-lg" style="background:${t.poster}"></div>
+    <div class="poster-lg" sstyle="background: linear-gradient(160deg,#173a2e,#0c1e17);"></div>
     <div class="info">
         <div class="badge">
             | Open Tournament
@@ -61,11 +61,11 @@
 
 <div class="tab-row">
 
-    <button class="tab-btn">
+    <button type="button" class="tab-btn active">
         Fixture
     </button>
 
-    <button class="tab-btn active">
+    <button class="tab-btn">
         Results
     </button>
 
@@ -79,72 +79,7 @@
 
 </div>
 
-<div id="tabContent">
 
-    <div class="acc open">
 
-        <div class="acc-head">
-
-            <span>Group Stage</span>
-
-            <span class="count">
-
-                12 Match
-
-            </span>
-
-        </div>
-
-        <div class="acc-body">
-
-            <div class="m-card">
-
-                <div class="m-header">
-
-                    MEN · GROUP A
-
-                </div>
-
-                <div class="m-team">
-
-                    <div class="names">
-
-                        Michelle / Alice
-
-                    </div>
-
-                    <div class="score">
-
-                        6
-
-                    </div>
-
-                </div>
-
-                <div class="m-divider"></div>
-
-                <div class="m-team winner">
-
-                    <div class="names">
-
-                        Kevin / Budi
-
-                    </div>
-
-                    <div class="score">
-
-                        7
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-</div>
 
 @endsection
