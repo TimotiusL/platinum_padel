@@ -1,1 +1,0 @@
-@include('components.tournament.leaderboard.player-card')
