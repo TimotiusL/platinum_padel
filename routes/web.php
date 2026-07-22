@@ -1,25 +1,43 @@
 <?php
 
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\PlayerController;
+use App\Http\Controllers\Api\TournamentController;
+use App\Http\Controllers\Api\MatchController;
+use App\Http\Controllers\Admin\AdminController;
 
-Route::get('/', [HomeController::class, 'index'])->name('home');
-
-// Compatibility URLs: the reference interface uses hash-based navigation.
-Route::get('/tournaments', [HomeController::class, 'tournaments'])->name('tournaments.index');
-Route::get('/tournaments/{id}', [HomeController::class, 'tournament'])->name('tournaments.show');
-Route::get('/players', [HomeController::class, 'players'])->name('players.index');
-Route::get('/players/{id}', [HomeController::class, 'player'])->name('players.show');
-
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
-
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+/*
+|--------------------------------------------------------------------------
+| API ROUTES
+|--------------------------------------------------------------------------
+*/
+Route::prefix('api/v1')->group(function () {
+    Route::get('/players', [PlayerController::class, 'index']);
+    Route::get('/players/{id}', [PlayerController::class, 'show']);
+    Route::get('/players/leaders', [PlayerController::class, 'leaders']);
+    Route::get('/tournaments', [TournamentController::class, 'index']);
+    Route::get('/tournaments/{id}', [TournamentController::class, 'show']);
+    Route::get('/tournaments/history', [TournamentController::class, 'history']);
+    Route::get('/matches', [MatchController::class, 'index']);
+    Route::get('/matches/{id}', [MatchController::class, 'show']);
+    Route::get('/matches/bracket/{tournamentId}', [MatchController::class, 'bracket']);
 });
 
-require __DIR__ . '/auth.php';
+/*
+|--------------------------------------------------------------------------
+| ADMIN ROUTES
+|--------------------------------------------------------------------------
+*/
+Route::prefix('/admin')->group(function () {
+    Route::get('/login', [AdminController::class, 'login'])->name('admin.login');
+    Route::post('/login', [AdminController::class, 'authenticate']);
+    Route::get('/dashboard', [AdminController::class, 'dashboard'])->middleware('admin');
+    Route::get('/logout', [AdminController::class, 'logout']);
+});
+
+/*
+|--------------------------------------------------------------------------
+| SPA ROUTE (MUST BE LAST)
+|--------------------------------------------------------------------------
+*/
+Route::view('/{any}', 'app')->where('any', '^(?!api|admin).*$');
