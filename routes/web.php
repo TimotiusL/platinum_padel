@@ -1,12 +1,16 @@
 <?php
 
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\HomeController;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [HomeController::class, 'index'])->name('home');
+
+// Compatibility URLs: the reference interface uses hash-based navigation.
+Route::get('/tournaments', [HomeController::class, 'tournaments'])->name('tournaments.index');
+Route::get('/tournaments/{id}', [HomeController::class, 'tournament'])->name('tournaments.show');
+Route::get('/players', [HomeController::class, 'players'])->name('players.index');
+Route::get('/players/{id}', [HomeController::class, 'player'])->name('players.show');
 
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -18,29 +22,4 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
-
-Route::get('/', function () {
-    return view('home.index');
-})->name('home');
-
-Route::get('/tournaments', function () {
-    return view('tournaments.index');
-})->name('tournaments.index');
-
-Route::get('/tournaments/{id}', function ($id) {
-    return view('tournaments.show');
-})->name('tournaments.show');
-
-Route::get('/players', function () {
-    return view('players.index');
-})->name('players.index');
-
-Route::get('/players/{id}', function ($id) {
-    return view('players.show');
-})->name('players.show');
-
-Route::get('/registrations/create', function () {
-    return view('registrations.create');
-})->name('registrations.create');
-
+require __DIR__ . '/auth.php';

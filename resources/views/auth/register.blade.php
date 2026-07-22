@@ -1,52 +1,66 @@
-<x-guest-layout>
-    <form method="POST" action="{{ route('register') }}">
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Register — Platinum Padel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,600&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/platinum-auth.css">
+</head>
+<body>
+  <div class="auth-wrap">
+    <div class="brand-row">
+      <a class="word" href="{{ route('home') }}">PLATINUM <b>PADEL</b></a>
+    </div>
+    <div class="auth-card">
+      <div class="eyebrow">Bergabung dengan Platinum Societas</div>
+      <h1>Buat Akun</h1>
+      <p class="lead">Daftar untuk mengikuti turnamen dan melacak riwayat pertandinganmu.</p>
+
+      @if ($errors->any())
+        <div class="alert alert-error">
+          @foreach ($errors->all() as $error)
+            &bull; {{ $error }}<br>
+          @endforeach
+        </div>
+      @endif
+
+      <form method="POST" action="{{ route('register') }}" novalidate>
         @csrf
-
-        <!-- Name -->
-        <div>
-            <x-input-label for="name" :value="__('Name')" />
-            <x-text-input id="name" class="block mt-1 w-full" type="text" name="name" :value="old('name')" required autofocus autocomplete="name" />
-            <x-input-error :messages="$errors->get('name')" class="mt-2" />
+        <div class="field">
+          <label for="name">Nama Lengkap</label>
+          <input id="name" type="text" name="name" placeholder="cth. Alexander Wibowo" value="{{ old('name') }}" required autofocus autocomplete="name">
         </div>
-
-        <!-- Email Address -->
-        <div class="mt-4">
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" type="email" name="email" placeholder="nama@email.com" value="{{ old('email') }}" required autocomplete="username">
         </div>
-
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
-
-            <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="new-password" />
-
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
+        <div class="field-row">
+          <div class="field">
+            <label for="phone">No. WhatsApp</label>
+            <input id="phone" type="text" name="phone" placeholder="08xx xxxx xxxx" value="{{ old('phone') }}" required autocomplete="tel">
+          </div>
+          <div class="field">
+            <label for="city">Kota Domisili</label>
+            <input id="city" type="text" name="city" placeholder="cth. Jakarta Selatan" value="{{ old('city') }}" autocomplete="address-level2">
+          </div>
         </div>
-
-        <!-- Confirm Password -->
-        <div class="mt-4">
-            <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
-
-            <x-text-input id="password_confirmation" class="block mt-1 w-full"
-                            type="password"
-                            name="password_confirmation" required autocomplete="new-password" />
-
-            <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
+        <div class="field-row">
+          <div class="field">
+            <label for="password">Kata Sandi</label>
+            <input id="password" type="password" name="password" placeholder="Minimal 6 karakter" required autocomplete="new-password">
+          </div>
+          <div class="field">
+            <label for="password_confirmation">Konfirmasi Sandi</label>
+            <input id="password_confirmation" type="password" name="password_confirmation" placeholder="Ulangi kata sandi" required autocomplete="new-password">
+          </div>
         </div>
+        <button type="submit" class="btn">Buat Akun</button>
+      </form>
 
-        <div class="flex items-center justify-end mt-4">
-            <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('login') }}">
-                {{ __('Already registered?') }}
-            </a>
-
-            <x-primary-button class="ms-4">
-                {{ __('Register') }}
-            </x-primary-button>
-        </div>
-    </form>
-</x-guest-layout>
+      <div class="switch-line">Sudah punya akun? <a href="{{ route('login') }}">Sign In di sini</a></div>
+    </div>
+  </div>
+</body>
+</html>

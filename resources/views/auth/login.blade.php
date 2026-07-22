@@ -1,47 +1,50 @@
-<x-guest-layout>
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign In — Platinum Padel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,600&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/platinum-auth.css">
+</head>
+<body>
+  <div class="auth-wrap">
+    <div class="brand-row">
+      <a class="word" href="{{ route('home') }}">PLATINUM <b>PADEL</b></a>
+    </div>
+    <div class="auth-card">
+      <div class="eyebrow">Selamat Datang Kembali</div>
+      <h1>Sign In</h1>
+      <p class="lead">Masuk untuk melihat statistik dan riwayat turnamenmu.</p>
 
-    <form method="POST" action="{{ route('login') }}">
+      @if (session('status'))
+        <div class="alert alert-success">{{ session('status') }}</div>
+      @endif
+
+      @if ($errors->any())
+        <div class="alert alert-error">
+          @foreach ($errors->all() as $error)
+            &bull; {{ $error }}<br>
+          @endforeach
+        </div>
+      @endif
+
+      <form method="POST" action="{{ route('login') }}" novalidate>
         @csrf
-
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" type="email" name="email" placeholder="nama@email.com" value="{{ old('email') }}" required autofocus autocomplete="username">
         </div>
-
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
-
-            <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="current-password" />
-
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
+        <div class="field">
+          <label for="password">Kata Sandi</label>
+          <input id="password" type="password" name="password" placeholder="Kata sandi" required autocomplete="current-password">
         </div>
+        <button type="submit" class="btn">Sign In</button>
+      </form>
 
-        <!-- Remember Me -->
-        <div class="block mt-4">
-            <label for="remember_me" class="inline-flex items-center">
-                <input id="remember_me" type="checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" name="remember">
-                <span class="ms-2 text-sm text-gray-600">{{ __('Remember me') }}</span>
-            </label>
-        </div>
-
-        <div class="flex items-center justify-end mt-4">
-            @if (Route::has('password.request'))
-                <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('password.request') }}">
-                    {{ __('Forgot your password?') }}
-                </a>
-            @endif
-
-            <x-primary-button class="ms-3">
-                {{ __('Log in') }}
-            </x-primary-button>
-        </div>
-    </form>
-</x-guest-layout>
+      <div class="switch-line">Belum punya akun? <a href="{{ route('register') }}">Register di sini</a></div>
+    </div>
+  </div>
+</body>
+</html>

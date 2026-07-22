@@ -1,85 +1,43 @@
-@extends('layouts.app')
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Platinum Padel Tournament</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Parisienne&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/platinum.css">
 
-@section('title','Home')
+</head>
+<body>
 
-@section('content')
-
-<section class="hero">
-    <div class="watermark"></div>
-    <div class="hero-inner">
-        <div class="kicker">Platinum Societas presents</div>
-        <h1>Home of Padel<br><em>Players &amp; Tournaments</em></h1>
-        <p>Where every rally is recorded, every rank is earned, and every champion joins the Platinum roster.</p>
-        <button onclick="window.location='{{ route('register') }}'" class="cta-gold">Daftar sebagai Player &nbsp;→</button>
+<header>
+  <div class="header-inner">
+    <div class="nav-left" id="navLeft">
+      <a href="#/" data-route="home">Home</a>
+      <a href="#/tournaments" data-route="tournaments">Tournaments</a>
+      <a href="#/players" data-route="players">Players</a>
     </div>
-</section>
-
-<section class="section">
-    <div class="section-head">
-        <div>
-            <div class="eyebrow">
-                Currently Live
-            </div>
-            <h2>
-                Tournaments
-            </h2>
-        </div>
-        <a
-            class="see-all"
-            href="{{ route('tournaments.index') }}">
-            View All →
-        </a>
+    <div class="brand" onclick="location.hash='#/'" style="cursor:pointer;">
+      <svg class="mono" viewBox="0 0 60 60" fill="none">
+        <line x1="30" y1="6" x2="30" y2="54" stroke="var(--gold)" stroke-width="1.4"/>
+        <path d="M14 12h7c4 0 6.5 2.4 6.5 6s-2.5 6-6.5 6h-3v8h-4V12zm4 3.2v5.6h2.6c2 0 3-1 3-2.8s-1-2.8-3-2.8H18z" fill="var(--gold)" transform="translate(-4,4)"/>
+        <path d="M14 12h7c4 0 6.5 2.4 6.5 6s-2.5 6-6.5 6h-3v8h-4V12zm4 3.2v5.6h2.6c2 0 3-1 3-2.8s-1-2.8-3-2.8H18z" fill="var(--gold)" transform="translate(20,4) scale(-1,1) translate(-38,0)"/>
+        <line x1="12" y1="22" x2="26" y2="22" stroke="var(--gold)" stroke-width="1.2"/>
+      </svg>
+      <div class="word">PLATINUM <b>PADEL</b></div>
     </div>
-    <div class="t-grid">
-        @include('components.tournament-card')
-    </div>
-</section>
+    <div class="nav-right" aria-hidden="true"></div>
+  </div>
+</header>
 
-<section class="section">
-    <div class="section-head">
-        <div>
-            <div class="eyebrow">
-                Latest Champions
-            </div>
-            <h2>
-                Finalist Pool
-            </h2>
-        </div>
-    </div>
-    <div class="f-grid">
-        @include('components.finalist-card')
+<main id="app"></main>
 
-        @include('components.finalist-card')
+<footer>
+  &copy; 2026 <b>Platinum Padel</b>. Hak Cipta Dilindungi. · The Great Contest
+</footer>
 
-        @include('components.finalist-card')
+<script src="/js/platinum.js" defer></script>
 
-        @include('components.finalist-card')
-    </div>
-</section>
-
-<section class="section">
-    <div class="section-head">
-        <div>
-            <div class="eyebrow">
-                Archive
-            </div>
-            <h2>
-                History
-            </h2>
-        </div>
-        <span class="see-all">
-            3 Tournaments
-        </span>
-    </div>
-    <div class="h-grid">
-
-        @include('components.history-card')
-
-        @include('components.history-card')
-
-        @include('components.history-card')
-
-    </div>
-</section>
-
-@endsection
+</body>
+</html>
