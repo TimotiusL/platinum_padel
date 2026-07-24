@@ -34,7 +34,7 @@
                 <a href="#">Manage</a>
             </div>
             <div class="card">
-                <div class="stat">{{ \App\Models\Match::count() }}</div>
+                <div class="stat">{{ \App\Models\MatchTournament::count() }}</div>
                 <div>Matches</div>
                 <a href="#">Manage</a>
             </div>

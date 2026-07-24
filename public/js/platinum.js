@@ -53,77 +53,72 @@ async function fetchAPI(endpoint) {
 async function loadData() {
     console.log('🔄 Loading data from API...');
     
-    // 1. Load players
-    const playersData = await fetchAPI('/players');
-    if (playersData && playersData.players) {
-        PLAYERS = playersData.players;
-        console.log('✅ Players loaded:', PLAYERS.length);
-    }
+    try {
+        // LOAD PARALLEL (lebih cepat)
+        const [playersData, tournamentsData, historyData, leadersData] = await Promise.all([
+            fetchAPI('/players?limit=20'),
+            fetchAPI('/tournaments?status=ongoing,upcoming&limit=10'),
+            fetchAPI('/tournaments/history?limit=5'),
+            fetchAPI('/players/leaders?limit=6')
+        ]);
 
-    // 2. Load tournaments
-    const tournamentsData = await fetchAPI('/tournaments');
-    if (tournamentsData && tournamentsData.tournaments) {
-        TOURNAMENTS = tournamentsData.tournaments;
-        console.log('✅ Tournaments loaded:', TOURNAMENTS.length);
-    }
+        // 1. Players
+        if (playersData?.players) {
+            PLAYERS = playersData.players;
+            console.log('✅ Players loaded:', PLAYERS.length);
+        }
 
-    // 3. Load history
-    const historyData = await fetchAPI('/tournaments/history');
-    if (historyData && historyData.history) {
-        HISTORY = historyData.history;
-        console.log('✅ History loaded:', HISTORY.length);
-    }
+        // 2. Tournaments
+        if (tournamentsData?.tournaments) {
+            TOURNAMENTS = tournamentsData.tournaments;
+            console.log('✅ Tournaments loaded:', TOURNAMENTS.length);
+        }
 
-    // 4. Load specific tournament detail (default: id=1)
-    const tournamentDetail = await fetchAPI('/tournaments/' + CURRENT_TOURNAMENT_ID);
-    if (tournamentDetail) {
-        // Build GROUPS from teams
-        const teams = tournamentDetail.teams || {};
-        GROUPS = {};
-        Object.keys(teams).forEach(groupCode => {
-            GROUPS[groupCode] = teams[groupCode].map(team => ({
-                code: team.code,
-                players: team.players || [team.player1?.name || '?', team.player2?.name || '?']
+        // 3. History
+        if (historyData?.history) {
+            HISTORY = historyData.history;
+            console.log('✅ History loaded:', HISTORY.length);
+        }
+
+        // 4. Finalists
+        if (leadersData?.players) {
+            FINALISTS = leadersData.players.map(p => ({
+                initials: getInitials(p.name),
+                name: p.name,
+                tname: p.titles > 0 ? `${p.titles}x Champion` : 'Player'
             }));
-        });
-        console.log('✅ Groups loaded:', Object.keys(GROUPS));
+            console.log('✅ Finalists loaded:', FINALISTS.length);
+        }
 
-        // Build match data
-        const matches = tournamentDetail.matches || {};
-        R16 = matches.r16 || [];
-        QF = matches.qf || [];
-        SF = matches.sf || [];
-        FINAL = matches.final || [];
-        console.log('✅ Matches loaded:', { R16: R16.length, QF: QF.length, SF: SF.length, FINAL: FINAL.length });
+        // 5. Load tournament detail (hanya jika ada tournament)
+        if (TOURNAMENTS.length > 0) {
+            const activeTournament = TOURNAMENTS.find(t => t.status === 'ongoing') || TOURNAMENTS[0];
+            if (activeTournament) {
+                const tournamentDetail = await fetchAPI(`/tournaments/${activeTournament.id}?with=teams,matches`);
+                if (tournamentDetail) {
+                    const teams = tournamentDetail.teams || {};
+                    GROUPS = {};
+                    Object.keys(teams).forEach(groupCode => {
+                        GROUPS[groupCode] = teams[groupCode].map(team => ({
+                            code: team.code,
+                            players: team.players || [team.player1?.name || '?', team.player2?.name || '?']
+                        }));
+                    });
+
+                    const matches = tournamentDetail.matches || {};
+                    R16 = matches.r16 || [];
+                    QF = matches.qf || [];
+                    SF = matches.sf || [];
+                    FINAL = matches.final || [];
+                    console.log('✅ Tournament detail loaded');
+                }
+            }
+        }
+
+        console.log('✅ All data loaded!');
+    } catch (error) {
+        console.error('❌ Error loading data:', error);
     }
-
-    // 5. Load leaders for finalists
-    const leadersData = await fetchAPI('/players/leaders');
-    if (leadersData && leadersData.players) {
-        FINALISTS = leadersData.players.slice(0, 6).map(p => ({
-            initials: getInitials(p.name),
-            name: p.name,
-            tname: p.titles > 0 ? `${p.titles}x Champion` : 'Player'
-        }));
-        console.log('✅ Finalists loaded:', FINALISTS.length);
-    }
-
-    // 6. Load player profile (default: id=1)
-    const profileData = await fetchAPI('/players/1');
-    if (profileData && profileData.player) {
-        PLAYER_PROFILE = {
-            name: profileData.player.name,
-            main: profileData.player.profile_data?.main || 0,
-            menang: profileData.player.profile_data?.menang || 0,
-            winrate: profileData.player.profile_data?.winrate || 0,
-            juara: profileData.player.titles || 0,
-            years: profileData.player.profile_data?.years || [],
-            history: profileData.player.profile_data?.history || []
-        };
-        console.log('✅ Player profile loaded');
-    }
-
-    console.log('✅ All data loaded!');
 }
 
 /* ============================= HELPERS ============================= */
@@ -651,8 +646,32 @@ function groupRosterSection(group) {
 
 function viewPlayers() {
     const groups = Object.keys(GROUPS);
+    
+    // Jika masih loading, tampilkan skeleton
     if (groups.length === 0) {
-        return `<div class="empty">⏳ Loading players data...</div>`;
+        return `
+        <div style="padding-top:40px;"></div>
+        <div class="lb-head">
+            <div class="lb-title">
+                <div class="eyebrow">The Roster</div>
+                <h1>Player Grouping</h1>
+            </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+            ${[1,2,3,4].map(() => `
+                <div style="background:#173a2e;border-radius:12px;padding:20px;border:1px solid rgba(201,167,102,0.22);">
+                    <div style="height:60px;background:linear-gradient(90deg,#1c4335 25%,#2a5a48 50%,#1c4335 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:8px;"></div>
+                    <div style="height:40px;margin-top:12px;background:linear-gradient(90deg,#1c4335 25%,#2a5a48 50%,#1c4335 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:8px;"></div>
+                </div>
+            `).join('')}
+        </div>
+        <style>
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        </style>
+        `;
     }
     
     return `
@@ -833,18 +852,66 @@ function updateNav(route) {
 
 let isLoading = false;
 
+// Load players only
+async function loadPlayersOnly() {
+    console.log('🔄 Loading players...');
+    const data = await fetchAPI('/players?limit=50');
+    if (data?.players) {
+        PLAYERS = data.players;
+        console.log('✅ Players loaded:', PLAYERS.length);
+    }
+}
+
+// Load tournaments only
+async function loadTournamentsOnly() {
+    console.log('🔄 Loading tournaments...');
+    const [tournamentsData, leadersData] = await Promise.all([
+        fetchAPI('/tournaments?status=ongoing,upcoming&limit=10'),
+        fetchAPI('/players/leaders?limit=6')
+    ]);
+    
+    if (tournamentsData?.tournaments) {
+        TOURNAMENTS = tournamentsData.tournaments;
+        console.log('✅ Tournaments loaded:', TOURNAMENTS.length);
+    }
+    
+    if (leadersData?.players) {
+        FINALISTS = leadersData.players.map(p => ({
+            initials: getInitials(p.name),
+            name: p.name,
+            tname: p.titles > 0 ? `${p.titles}x Champion` : 'Player'
+        }));
+        console.log('✅ Finalists loaded:', FINALISTS.length);
+    }
+}
+
+// Load tournament detail
+async function loadTournamentDetail(id) {
+    console.log('🔄 Loading tournament detail...');
+    const data = await fetchAPI(`/tournaments/${id}?with=teams,matches`);
+    if (data) {
+        const teams = data.teams || {};
+        GROUPS = {};
+        Object.keys(teams).forEach(groupCode => {
+            GROUPS[groupCode] = teams[groupCode].map(team => ({
+                code: team.code,
+                players: team.players || [team.player1?.name || '?', team.player2?.name || '?']
+            }));
+        });
+
+        const matches = data.matches || {};
+        R16 = matches.r16 || [];
+        QF = matches.qf || [];
+        SF = matches.sf || [];
+        FINAL = matches.final || [];
+        console.log('✅ Tournament detail loaded');
+    }
+}
+
 async function router() {
     if (homeCountdownTimer) {
         window.clearInterval(homeCountdownTimer);
         homeCountdownTimer = null;
-    }
-
-    // Load data if not loaded yet
-    if (PLAYERS.length === 0 && !isLoading) {
-        isLoading = true;
-        app.innerHTML = `<div class="empty" style="padding:80px 20px;">⏳ Loading data...</div>`;
-        await loadData();
-        isLoading = false;
     }
 
     const hash = location.hash || '#/';
@@ -856,26 +923,49 @@ async function router() {
         app.innerHTML = viewHome();
         updateNav('home');
         attachHomeHandlers();
-    } else if (hash === '#/tournaments') {
+        return;
+    }
+
+    // LOAD DATA PER HALAMAN (lazy loading)
+    if (hash === '#/tournaments') {
+        if (TOURNAMENTS.length === 0) {
+            app.innerHTML = `<div class="empty" style="padding:80px 20px;">⏳ Loading tournaments...</div>`;
+            await loadTournamentsOnly();
+        }
         app.innerHTML = viewTournaments();
         updateNav('tournaments');
+        
     } else if (hash.startsWith('#/tournament/')) {
         const id = hash.split('/')[2];
+        app.innerHTML = `<div class="empty" style="padding:80px 20px;">⏳ Loading tournament details...</div>`;
+        await loadTournamentDetail(id);
         app.innerHTML = viewTournamentDetail(id);
         updateNav('tournaments');
         setTimeout(attachTournamentHandlers, 100);
+        
     } else if (hash.startsWith('#/match/')) {
         const id = hash.split('/')[2];
-        app.innerHTML = await viewMatchDetail(id) || `<div class="empty">Match not found</div>`;
+        app.innerHTML = `<div class="empty" style="padding:80px 20px;">⏳ Loading match...</div>`;
+        const content = await viewMatchDetail(id) || `<div class="empty">Match not found</div>`;
+        app.innerHTML = content;
         updateNav('tournaments');
+        
     } else if (hash === '#/players') {
+        if (PLAYERS.length === 0) {
+            app.innerHTML = `<div class="empty" style="padding:80px 20px;">⏳ Loading players...</div>`;
+            await loadPlayersOnly();
+        }
         app.innerHTML = viewPlayers();
         updateNav('players');
         setTimeout(attachPlayersHandlers, 100);
+        
     } else if (hash.startsWith('#/player/')) {
         const id = hash.split('/')[2];
-        app.innerHTML = await viewPlayerProfile(id) || `<div class="empty">Player not found</div>`;
+        app.innerHTML = `<div class="empty" style="padding:80px 20px;">⏳ Loading player profile...</div>`;
+        const content = await viewPlayerProfile(id) || `<div class="empty">Player not found</div>`;
+        app.innerHTML = content;
         updateNav('players');
+        
     } else {
         app.innerHTML = `<div class="empty">Halaman tidak ditemukan.</div>`;
         updateNav('');

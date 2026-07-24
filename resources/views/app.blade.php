@@ -24,52 +24,39 @@
                 </svg>
                 <span class="word"><b>PLATINUM</b> PADEL</span>
             </div>
+            <!-- 👇 ADMIN DIHAPUS DARI SINI -->
             <div class="nav-right">
-                <details class="profile-menu">
-                    <summary class="profile-trigger">
-                        <div class="profile-avatar">AG</div>
-                        <div class="profile-copy">
-                            <strong>Admin</strong>
-                            <small>Platinum Padel</small>
-                        </div>
-                        <span class="profile-chevron">▾</span>
-                    </summary>
-                    <div class="profile-dropdown">
-                        <div class="signed-label">Signed in as</div>
-                        <div class="signed-name">Admin</div>
-                        <div class="signed-email">admin@platinum.com</div>
-                        <div class="profile-actions">
-                            <a href="#/admin/dashboard" class="profile-link">Dashboard</a>
-                            <a href="/logout" class="profile-link logout">Logout</a>
-                        </div>
-                    </div>
-                </details>
+                <!-- Kosong, atau bisa tambahkan social media / info lain -->
             </div>
         </div>
     </header>
 
     <main id="app">
-        <!-- Content will be rendered by platinum.js -->
         <div class="loading">Loading...</div>
     </main>
 
     <footer>
         <p><b>PLATINUM PADEL</b> &middot; Sportsmanship &middot; Community &middot; Excellence</p>
         <p style="margin-top:6px;font-size:10px;">&copy; 2026 Platinum Padel. All rights reserved.</p>
-        <!-- Hidden admin link -->
+        
+        <!-- Hidden admin link - double tap logo to show -->
         <div class="admin-hidden" style="display:none;">
             <a href="/admin/login" style="color:transparent;font-size:1px;">Admin Login</a>
         </div>
     </footer>
 
-    <!-- Admin access: Double tap logo to show admin link -->
     <script>
+        // Double tap logo untuk akses admin
         let adminTapCount = 0;
         document.querySelector('.brand').addEventListener('dblclick', function(e) {
             adminTapCount++;
             if (adminTapCount >= 2) {
                 document.querySelector('.admin-hidden').style.display = 'block';
                 adminTapCount = 0;
+                // Auto hide after 5 seconds
+                setTimeout(() => {
+                    document.querySelector('.admin-hidden').style.display = 'none';
+                }, 5000);
             }
             setTimeout(() => { adminTapCount = 0; }, 2000);
         });
