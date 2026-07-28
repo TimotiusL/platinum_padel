@@ -1,31 +1,28 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Team;
 
 class Player extends Model
 {
-    protected $fillable = ['name', 'location', 'titles', 'rank', 'photo_url', 'profile_data'];
-
-    protected $casts = [
-        'profile_data' => 'array',
+    protected $fillable = [
+        'user_id',
+        'phone',
+        'birth_date',
+        'gender',
+        'city',
+        'photo',
+        'ranking_point'
     ];
 
-    public function teams()
+    public function user()
     {
-        return $this->hasMany(Team::class, 'player1_id')
-            ->orWhere('player2_id', $this->id);
+        return $this->belongsTo(User::class);
     }
 
-    public function fullName()
+    public function teamMembers()
     {
-        return $this->name;
-    }
-
-    public function initials()
-    {
-        $parts = explode(' ', $this->name);
-        return strtoupper(substr($parts[0], 0, 1) . (isset($parts[1]) ? substr($parts[1], 0, 1) : ''));
+        return $this->hasMany(TeamMember::class);
     }
 }

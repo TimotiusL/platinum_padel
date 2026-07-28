@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -7,12 +8,26 @@ use Illuminate\Http\Request;
 
 class PlayerController extends Controller
 {
-    public function index()
-    {
-        return response()->json([
-            'players' => Player::orderBy('rank')->get()
-        ]);
-    }
+   public function index()
+{
+    $players = Player::with('user')
+        ->orderByDesc('ranking_point')
+        ->get()
+        ->map(function ($p) {
+            return [
+                'id' => $p->id,
+                'name' => $p->user->name,
+                'location' => $p->city,
+                'rank' => $p->ranking_point,
+                'titles' => 0,
+                'photo' => $p->photo,
+            ];
+        });
+
+    return response()->json([
+        'players' => $players
+    ]);
+}
 
     public function show($id)
     {

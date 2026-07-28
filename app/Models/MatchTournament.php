@@ -1,51 +1,45 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Tournament;
-use App\Models\Team;
 
 class MatchTournament extends Model
 {
+    protected $table = 'tournament_matches';
+
     protected $fillable = [
-        'tournament_id', 'team1_id', 'team2_id', 'score1', 'score2',
-        'winner_id', 'stage', 'round', 'scheduled_at', 'played_at',
-        'score_history'
+        'category_id',
+        'team_a_id',
+        'team_b_id',
+        'winner_team_id',
+        'round',
+        'court',
+        'match_date',
+        'status'
     ];
 
     protected $casts = [
-        'score_history' => 'array',
-        'scheduled_at' => 'datetime',
-        'played_at' => 'datetime',
+        'match_date' => 'datetime',
     ];
 
-    public function tournament()
+    public function category()
     {
-        return $this->belongsTo(Tournament::class);
+        return $this->belongsTo(Category::class, 'category_id');
     }
 
-    public function team1()
+    public function teamA()
     {
-        return $this->belongsTo(Team::class, 'team1_id');
+        return $this->belongsTo(Team::class, 'team_a_id');
     }
 
-    public function team2()
+    public function teamB()
     {
-        return $this->belongsTo(Team::class, 'team2_id');
+        return $this->belongsTo(Team::class, 'team_b_id');
     }
 
     public function winner()
     {
-        return $this->belongsTo(Team::class, 'winner_id');
-    }
-
-    public function getTeam1PlayersAttribute()
-    {
-        return $this->team1 ? [$this->team1->player1->name, $this->team1->player2->name] : [];
-    }
-
-    public function getTeam2PlayersAttribute()
-    {
-        return $this->team2 ? [$this->team2->player1->name, $this->team2->player2->name] : [];
+        return $this->belongsTo(Team::class, 'winner_team_id');
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -16,31 +17,44 @@ class TournamentController extends Controller
         ]);
     }
 
-    public function show($id)
-    {
-        $tournament = Tournament::with(['matches' => function($q) {
-            $q->with(['team1.player1', 'team1.player2', 'team2.player1', 'team2.player2', 'winner']);
-        }, 'teams.player1', 'teams.player2'])->findOrFail($id);
+   public function show($id)
+{
+    $tournament = Tournament::with([
+        'categories.teams.members.player.user'
+    ])->findOrFail($id);
 
-        // Group matches by stage
-        $stages = ['group_stage', 'r16', 'qf', 'sf', 'final'];
-        $groupedMatches = [];
-        foreach ($stages as $stage) {
-            $groupedMatches[$stage] = $tournament->matches
-                ->where('stage', $stage)
-                ->values();
+    $teams = [];
+
+    foreach ($tournament->categories as $category) {
+
+        foreach ($category->teams as $team) {
+
+            $players = $team->members
+                ->sortByDesc('is_captain')
+                ->map(function ($member) {
+                    return $member->player?->user?->name ?? '?';
+                })
+                ->values()
+                ->toArray();
+
+            $teams[$team->group_code][] = [
+                'code' => $team->team_code,
+                'players' => $players
+            ];
         }
-
-        // Group teams by group_code
-        $groupedTeams = $tournament->teams->groupBy('group_code');
-
-        return response()->json([
-            'tournament' => $tournament,
-            'matches' => $groupedMatches,
-            'teams' => $groupedTeams,
-            'categories' => $this->getCategories()
-        ]);
     }
+
+    return response()->json([
+        'tournament' => $tournament,
+        'teams' => $teams,
+        'matches' => [
+            'r16' => [],
+            'qf' => [],
+            'sf' => [],
+            'final' => []
+        ]
+    ]);
+}
 
     public function history()
     {

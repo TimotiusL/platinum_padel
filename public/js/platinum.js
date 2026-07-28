@@ -16,23 +16,23 @@ let CURRENT_TOURNAMENT_ID = 1; // default tournament
 
 /* ============================= ICONS (TETAP SAMA) ============================= */
 const ICONS = {
-  calendar:`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="16" rx="1.5"/><path d="M3 9h18M8 3v4M16 3v4"/></svg>`,
-  pin:`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.3"/></svg>`,
-  court:`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="16" rx="1"/><path d="M12 4v16M3 12h18"/></svg>`,
-  crown:`<svg width="10" height="10" viewBox="0 0 24 24" fill="var(--bg-deepest)"><path d="M3 8l4 3 5-6 5 6 4-3-2 10H5L3 8z"/></svg>`,
-  back:`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>`,
-  chev:`<svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>`,
-  check:`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--win)" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>`,
-  trophy:`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0V4z"/><path d="M7 5H4a3 3 0 0 0 3 5M17 5h3a3 3 0 0 1-3 5"/></svg>`,
+    calendar: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="16" rx="1.5"/><path d="M3 9h18M8 3v4M16 3v4"/></svg>`,
+    pin: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.3"/></svg>`,
+    court: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="16" rx="1"/><path d="M12 4v16M3 12h18"/></svg>`,
+    crown: `<svg width="10" height="10" viewBox="0 0 24 24" fill="var(--bg-deepest)"><path d="M3 8l4 3 5-6 5 6 4-3-2 10H5L3 8z"/></svg>`,
+    back: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>`,
+    chev: `<svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>`,
+    check: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--win)" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg>`,
+    trophy: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0V4z"/><path d="M7 5H4a3 3 0 0 0 3 5M17 5h3a3 3 0 0 1-3 5"/></svg>`,
 };
 
 /* ============================= CATEGORIES (TETAP SAMA) ============================= */
 const CATEGORIES = [
-  {id:'rookie-men', label:'Rookie', tier:'Men'},
-  {id:'bronze-men', label:'Bronze', tier:'Men'},
-  {id:'upper-women', label:'Upper Beginner', tier:'Women'},
-  {id:'open-men', label:'Open', tier:'Men'},
-  {id:'open-women', label:'Open', tier:'Women'},
+    { id: 'rookie-men', label: 'Rookie', tier: 'Men' },
+    { id: 'bronze-men', label: 'Bronze', tier: 'Men' },
+    { id: 'upper-women', label: 'Upper Beginner', tier: 'Women' },
+    { id: 'open-men', label: 'Open', tier: 'Men' },
+    { id: 'open-women', label: 'Open', tier: 'Women' },
 ];
 
 let currentCat = 'open-men';
@@ -52,7 +52,7 @@ async function fetchAPI(endpoint) {
 
 async function loadData() {
     console.log('🔄 Loading data from API...');
-    
+
     try {
         // LOAD PARALLEL (lebih cepat)
         const [playersData, tournamentsData, historyData, leadersData] = await Promise.all([
@@ -166,13 +166,13 @@ function esc(s) { return s || ''; }
 /* ============================= MATCH CARD ============================= */
 function matchCard(m, cat, lap) {
     if (!m) return '';
-    
+
     // Get team names
     let team1Names = ['?', '?'];
     let team2Names = ['?', '?'];
     let team1Code = m.team1?.code || '';
     let team2Code = m.team2?.code || '';
-    
+
     if (m.team1) {
         team1Names = [
             m.team1.player1?.name || '?',
@@ -185,7 +185,7 @@ function matchCard(m, cat, lap) {
             m.team2.player2?.name || '?'
         ];
     }
-    
+
     const s1 = m.score1 !== undefined ? m.score1 : '-';
     const s2 = m.score2 !== undefined ? m.score2 : '-';
     const winner = m.winner_id || 0;
@@ -230,7 +230,7 @@ function tournamentCard(t) {
     if (!t) return '';
     const tags = t.tags || [];
     const poster = t.poster || 'linear-gradient(160deg,#173a2e,#0c1e17)';
-    
+
     return `
     <a href="#/tournament/${t.id}" class="t-card" style="display:flex;">
         <div class="poster" style="background:${poster}">
@@ -343,7 +343,7 @@ function viewTournaments() {
     if (TOURNAMENTS.length === 0) {
         return `<div class="empty">⏳ Loading tournaments...</div>`;
     }
-    
+
     return `
     <div style="padding-top:40px;"></div>
     <section>
@@ -396,7 +396,7 @@ function viewTournaments() {
 
 function viewTournamentDetail(id) {
     const t = TOURNAMENTS.find(x => x.id == id) || TOURNAMENTS[0] || { name: 'Tournament', badge: 'PLATINUM' };
-    
+
     return `
     <a class="back-link" href="#/tournaments">${ICONS.back} Kembali ke Tournaments</a>
     <div class="t-banner">
@@ -418,7 +418,7 @@ function viewTournamentDetail(id) {
     </div>
 
     <div class="tab-row" id="tabRow">
-        ${['fixture','results','leaderboard','bracket'].map(tb => `<button class="tab-btn ${tb === currentTab ? 'active' : ''}" data-tab="${tb}">${tb}</button>`).join('')}
+        ${['fixture', 'results', 'leaderboard', 'bracket'].map(tb => `<button class="tab-btn ${tb === currentTab ? 'active' : ''}" data-tab="${tb}">${tb}</button>`).join('')}
     </div>
 
     <div id="tabContent">${renderTabContent()}</div>
@@ -436,7 +436,7 @@ function renderTabContent() {
 function renderResults(isFixture) {
     // Get all matches from all stages
     const allMatches = { ...GROUPS };
-    
+
     return `
     <div class="acc open" data-acc="group">
         <div class="acc-head" onclick="toggleAcc(this.parentElement)">
@@ -516,19 +516,19 @@ async function viewMatchDetail(id) {
     if (!data || !data.match) {
         return `<div class="empty">Match not found</div>`;
     }
-    
+
     const m = data.match;
     const total = (m.score1 || 0) + (m.score2 || 0);
     const pct1 = total > 0 ? Math.round((m.score1 || 0) / total * 100) : 50;
     const pct2 = 100 - pct1;
-    
+
     const team1Names = m.team1 ? [m.team1.player1?.name || '?', m.team1.player2?.name || '?'] : ['?', '?'];
     const team2Names = m.team2 ? [m.team2.player1?.name || '?', m.team2.player2?.name || '?'] : ['?', '?'];
-    
+
     const scoreHistory = m.score_history || [
         { score: `${m.score1 || 0}-${m.score2 || 0}`, time: '00.00.00' }
     ];
-    
+
     return `
     <a class="back-link" href="#/tournament/${m.tournament_id}">${ICONS.back} Kembali ke Detail Turnamen</a>
     <div class="md-hero">
@@ -593,26 +593,30 @@ async function viewMatchDetail(id) {
 }
 
 function playerRow(p, i) {
-    const rankClass = p.rank <= 3 ? `rank-${p.rank}` : '';
-    const rankTop = p.rank <= 3 ? 'top' : '';
-    const location = p.location || '—';
-    
+    const rank = i + 1;
+    const rankClass = rank <= 3 ? `rank-${rank}` : '';
+    const rankTop = rank <= 3 ? 'top' : '';
+
+    const name = p.user?.name ?? 'Unknown';
+    const location = p.city ?? '—';
+    const points = p.ranking_point ?? 0;
+
     return `
     <a class="p-row ${rankClass}" href="#/player/${p.id}">
-        <div class="p-rank ${rankTop}">${p.rank}</div>
-        <div class="avatar">${getInitials(p.name)}</div>
+        <div class="p-rank ${rankTop}">${rank}</div>
+        <div class="avatar">${getInitials(name)}</div>
         <div class="p-info">
-            <div class="nm">${p.name}</div>
+            <div class="nm">${name}</div>
             <div class="loc">${location !== '—' ? ICONS.pin + ' ' + location : '—'}</div>
         </div>
-        <div class="p-titles">${ICONS.trophy} ${p.titles || 0} Titles</div>
+        <div class="p-titles">${ICONS.trophy} ${points} Points</div>
     </a>`;
 }
 
 function teamGroupCard(team) {
     const searchText = `${team.code} ${team.players?.join(' ') || ''}`.toLowerCase();
     const players = team.players || ['?', '?'];
-    
+
     return `
     <article class="team-group-card" data-team-search="${searchText}">
         <div class="team-code"><small>Team</small><strong>${team.code}</strong></div>
@@ -646,7 +650,7 @@ function groupRosterSection(group) {
 
 function viewPlayers() {
     const groups = Object.keys(GROUPS);
-    
+
     // Jika masih loading, tampilkan skeleton
     if (groups.length === 0) {
         return `
@@ -658,7 +662,7 @@ function viewPlayers() {
             </div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
-            ${[1,2,3,4].map(() => `
+            ${[1, 2, 3, 4].map(() => `
                 <div style="background:#173a2e;border-radius:12px;padding:20px;border:1px solid rgba(201,167,102,0.22);">
                     <div style="height:60px;background:linear-gradient(90deg,#1c4335 25%,#2a5a48 50%,#1c4335 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:8px;"></div>
                     <div style="height:40px;margin-top:12px;background:linear-gradient(90deg,#1c4335 25%,#2a5a48 50%,#1c4335 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:8px;"></div>
@@ -673,7 +677,7 @@ function viewPlayers() {
         </style>
         `;
     }
-    
+
     return `
     <div style="padding-top:40px;"></div>
     <div class="lb-head">
@@ -694,12 +698,12 @@ async function viewPlayerProfile(id) {
     if (!data || !data.player) {
         return `<div class="empty">Player not found</div>`;
     }
-    
+
     const p = data.player;
     const profile = data.profile || {};
     const years = profile.years || [];
     const history = profile.history || [];
-    
+
     return `
     <a class="back-link" href="#/players">${ICONS.back} Kembali ke Leaderboard</a>
     <div class="prof-banner">
@@ -719,7 +723,7 @@ async function viewPlayerProfile(id) {
         ${years.map(y => `
             <div class="year-card">
                 <div class="year-top"><span>${y.year}</span><span class="wr">${y.menang}/${y.main} menang</span></div>
-                <div class="bar"><div class="bar-fill" style="width:${y.main > 0 ? Math.round(y.menang/y.main*100) : 0}%;"></div></div>
+                <div class="bar"><div class="bar-fill" style="width:${y.main > 0 ? Math.round(y.menang / y.main * 100) : 0}%;"></div></div>
                 <div class="year-bottom">
                     <span>${y.main} main</span>
                     <span class="legend-dot"><i style="background:var(--win);"></i>${y.menang} menang</span>
@@ -874,12 +878,12 @@ async function loadTournamentsOnly() {
         fetchAPI('/tournaments?status=ongoing,upcoming&limit=10'),
         fetchAPI('/players/leaders?limit=6')
     ]);
-    
+
     if (tournamentsData?.tournaments) {
         TOURNAMENTS = tournamentsData.tournaments;
         console.log('✅ Tournaments loaded:', TOURNAMENTS.length);
     }
-    
+
     if (leadersData?.players) {
         FINALISTS = leadersData.players.map(p => ({
             initials: getInitials(p.name),
@@ -939,7 +943,7 @@ async function router() {
         }
         app.innerHTML = viewTournaments();
         updateNav('tournaments');
-        
+
     } else if (hash.startsWith('#/tournament/')) {
         const id = hash.split('/')[2];
         app.innerHTML = `<div class="empty" style="padding:80px 20px;">⏳ Loading tournament details...</div>`;
@@ -947,30 +951,41 @@ async function router() {
         app.innerHTML = viewTournamentDetail(id);
         updateNav('tournaments');
         setTimeout(attachTournamentHandlers, 100);
-        
+
     } else if (hash.startsWith('#/match/')) {
         const id = hash.split('/')[2];
         app.innerHTML = `<div class="empty" style="padding:80px 20px;">⏳ Loading match...</div>`;
         const content = await viewMatchDetail(id) || `<div class="empty">Match not found</div>`;
         app.innerHTML = content;
         updateNav('tournaments');
-        
+
     } else if (hash === '#/players') {
-        if (PLAYERS.length === 0) {
-            app.innerHTML = `<div class="empty" style="padding:80px 20px;">⏳ Loading players...</div>`;
+
+        if (PLAYERS.length === 0)
             await loadPlayersOnly();
+
+        if (Object.keys(GROUPS).length === 0) {
+
+            if (TOURNAMENTS.length === 0)
+                await loadTournamentsOnly();
+
+            const active =
+                TOURNAMENTS.find(t => t.status === 'ongoing') || TOURNAMENTS[0];
+
+            if (active)
+                await loadTournamentDetail(active.id);
         }
+
         app.innerHTML = viewPlayers();
         updateNav('players');
         setTimeout(attachPlayersHandlers, 100);
-        
     } else if (hash.startsWith('#/player/')) {
         const id = hash.split('/')[2];
         app.innerHTML = `<div class="empty" style="padding:80px 20px;">⏳ Loading player profile...</div>`;
         const content = await viewPlayerProfile(id) || `<div class="empty">Player not found</div>`;
         app.innerHTML = content;
         updateNav('players');
-        
+
     } else {
         app.innerHTML = `<div class="empty">Halaman tidak ditemukan.</div>`;
         updateNav('');
