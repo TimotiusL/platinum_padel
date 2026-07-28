@@ -845,8 +845,13 @@ function attachPlayersHandlers() {
 }
 
 function updateNav(route) {
-    document.querySelectorAll('#navLeft a').forEach(a => {
-        a.classList.toggle('active', a.dataset.route === route);
+    document.querySelectorAll('.nav-left a, .nav-left .nav-link').forEach(a => {
+        const linkRoute = a.dataset.route || a.getAttribute('href')?.replace('#/', '');
+        if (linkRoute === route) {
+            a.classList.add('active');
+        } else {
+            a.classList.remove('active');
+        }
     });
 }
 
