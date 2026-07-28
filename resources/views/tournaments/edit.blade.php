@@ -1,67 +1,89 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    <title>Edit Player</title>
+    <title>Edit Tournament</title>
 
     <style>
-        body{
-            font-family:Arial;
-            background:#0d2318;
-            color:white;
-            margin:40px;
+        body {
+            font-family: Arial;
+            background: #0c1e17;
+            color: white;
+            margin: 40px;
         }
 
-        input,select{
-            width:350px;
-            padding:10px;
-            margin-bottom:15px;
-            display:block;
-            border-radius:6px;
+        input,
+        textarea,
+        select {
+            width: 400px;
+            padding: 10px;
+            margin-bottom: 15px;
+            display: block;
+            border-radius: 8px;
         }
 
-        button{
-            background:#d6b46a;
-            padding:10px 20px;
-            border:none;
-            border-radius:6px;
-            cursor:pointer;
+        button {
+            padding: 10px 20px;
+            background: #c9a766;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
         }
 
-        a{
-            color:white;
+        a {
+            color: white;
         }
     </style>
 </head>
 
 <body>
 
-<h2>Edit Player</h2>
+    <h2>Edit Tournament</h2>
 
-<form action="{{ route('players.update',$player->id) }}" method="POST">
+    <form action="{{ route('tournaments.update', $tournament->id) }}" method="POST">
 
-    @csrf
-    @method('PUT')
+        @csrf
+        @method('PUT')
 
-    <input type="text" name="name" value="{{ $player->user->name }}">
+        <input type="text" name="title" value="{{ $tournament->title }}">
 
-    <input type="text" name="phone" value="{{ $player->phone }}">
+        <textarea name="description">{{ $tournament->description }}</textarea>
 
-    <input type="date" name="birth_date" value="{{ $player->birth_date }}">
+        <input type="text" name="poster" value="{{ $tournament->poster }}">
 
-    <select name="gender">
-        <option value="Male" {{ $player->gender=='Male'?'selected':'' }}>Male</option>
-        <option value="Female" {{ $player->gender=='Female'?'selected':'' }}>Female</option>
-    </select>
+        <input type="text" name="venue" value="{{ $tournament->venue }}">
 
-    <input type="text" name="city" value="{{ $player->city }}">
+        <input type="text" name="location" value="{{ $tournament->location }}">
 
-    <button type="submit">Update</button>
+        <label>Registration Deadline</label>
+        <input type="date" name="registration_deadline" value="{{ $tournament->registration_deadline }}">
 
-</form>
+        <label>Start Date</label>
+        <input type="date" name="start_date" value="{{ $tournament->start_date }}">
 
-<br>
+        <label>End Date</label>
+        <input type="date" name="end_date" value="{{ $tournament->end_date }}">
 
-<a href="{{ route('players.index') }}">Back</a>
+        <select name="status">
+            <option value="upcoming" {{ $tournament->status == 'upcoming' ? 'selected' : '' }}>Upcoming</option>
+            <option value="ongoing" {{ $tournament->status == 'ongoing' ? 'selected' : '' }}>Ongoing</option>
+            <option value="finished" {{ $tournament->status == 'finished' ? 'selected' : '' }}>Finished</option>
+        </select>
+
+        <input type="number" step="0.01" name="prize_pool" value="{{ $tournament->prize_pool }}">
+
+        <button type="submit">
+            Update Tournament
+        </button>
+
+    </form>
+
+    <br>
+
+    <a href="{{ route('tournaments.index') }}">
+        Back
+    </a>
 
 </body>
+
 </html>

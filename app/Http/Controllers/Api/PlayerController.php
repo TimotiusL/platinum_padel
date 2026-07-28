@@ -8,26 +8,26 @@ use Illuminate\Http\Request;
 
 class PlayerController extends Controller
 {
-   public function index()
-{
-    $players = Player::with('user')
-        ->orderByDesc('ranking_point')
-        ->get()
-        ->map(function ($p) {
-            return [
-                'id' => $p->id,
-                'name' => $p->user->name,
-                'location' => $p->city,
-                'rank' => $p->ranking_point,
-                'titles' => 0,
-                'photo' => $p->photo,
-            ];
-        });
+    public function index()
+    {
+        $players = Player::with('user')
+            ->orderByDesc('ranking_point')
+            ->get()
+            ->map(function ($p) {
+                return [
+                    'id' => $p->id,
+                    'name' => $p->user->name,
+                    'location' => $p->city,
+                    'rank' => $p->ranking_point,
+                    'titles' => 0,
+                    'photo' => $p->photo,
+                ];
+            });
 
-    return response()->json([
-        'players' => $players
-    ]);
-}
+        return response()->json([
+            'players' => $players
+        ]);
+    }
 
     public function show($id)
     {
@@ -40,12 +40,7 @@ class PlayerController extends Controller
 
     public function leaders()
     {
-        return response()->json([
-            'players' => Player::where('titles', '>', 0)
-                ->orderBy('titles', 'desc')
-                ->limit(10)
-                ->get()
-        ]);
+        dd('MASUK');
     }
 
     private function getDefaultProfile()

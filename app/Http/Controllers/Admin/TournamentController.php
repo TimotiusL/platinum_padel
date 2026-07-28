@@ -9,11 +9,11 @@ use Illuminate\Http\Request;
 class TournamentController extends Controller
 {
     public function index()
-{
-    $tournaments = Tournament::latest()->get();
+    {
+        $tournaments = Tournament::latest()->get();
 
-    return view('tournaments.index', compact('tournaments'));
-}
+        return view('tournaments.index', compact('tournaments'));
+    }
 
     public function create()
     {
@@ -21,23 +21,23 @@ class TournamentController extends Controller
     }
 
     public function store(Request $request)
-{
-    Tournament::create([
-        'name' => $request->name,
-        'badge' => $request->badge,
-        'start_date' => $request->start_date,
-        'end_date' => $request->end_date,
-        'venue' => $request->venue,
-        'venue_sub' => $request->venue_sub,
-        'location' => $request->location,
-        'prize' => $request->prize,
-        'status' => $request->status,
-        'poster' => $request->poster,
-        'tags' => explode(',', $request->tags)
-    ]);
+    {
+        Tournament::create([
+            'title' => $request->title,
+            'description' => $request->description,
+            'poster' => $request->poster,
+            'venue' => $request->venue,
+            'location' => $request->location,
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date,
+            'registration_deadline' => $request->registration_deadline,
+            'status' => $request->status,
+            'prize_pool' => $request->prize_pool,
+            'created_by' => 9999
+        ]);
 
-    return redirect()->route('tournaments.index');
-}
+        return redirect()->route('tournaments.index');
+    }
 
     public function edit(Tournament $tournament)
     {
@@ -46,7 +46,18 @@ class TournamentController extends Controller
 
     public function update(Request $request, Tournament $tournament)
     {
-        $tournament->update($request->all());
+        $tournament->update([
+            'title' => $request->title,
+            'description' => $request->description,
+            'poster' => $request->poster,
+            'venue' => $request->venue,
+            'location' => $request->location,
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date,
+            'registration_deadline' => $request->registration_deadline,
+            'status' => $request->status,
+            'prize_pool' => $request->prize_pool,
+        ]);
 
         return redirect()->route('tournaments.index');
     }

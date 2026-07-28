@@ -1,88 +1,90 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Create Tournament</title>
 
     <style>
-
-        body{
-            font-family:Arial;
-            background:#0c1e17;
-            color:white;
-            margin:40px;
+        body {
+            font-family: Arial;
+            background: #0c1e17;
+            color: white;
+            margin: 40px;
         }
 
-        input,textarea,select{
-            width:400px;
-            padding:10px;
-            margin-bottom:15px;
-            display:block;
-            border-radius:8px;
+        input,
+        textarea,
+        select {
+            width: 400px;
+            padding: 10px;
+            margin-bottom: 15px;
+            display: block;
+            border-radius: 8px;
         }
 
-        button{
-            padding:10px 20px;
-            background:#c9a766;
-            border:none;
-            border-radius:8px;
-            cursor:pointer;
+        button {
+            padding: 10px 20px;
+            background: #c9a766;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
         }
 
-        a{
-            color:white;
+        a {
+            color: white;
         }
-
     </style>
 
 </head>
 
 <body>
 
-<h2>Create Tournament</h2>
+    <h2>Create Tournament</h2>
 
-<form action="{{ route('tournaments.store') }}" method="POST">
+    <form action="{{ route('tournaments.store') }}" method="POST">
 
-    @csrf
+        @csrf
 
-    <input type="text" name="name" placeholder="Tournament Name">
+        <input type="text" name="title" placeholder="Tournament Title" required>
 
-    <input type="text" name="badge" placeholder="Badge">
+        <textarea name="description" placeholder="Description" rows="4"></textarea>
 
-    <label>Start Date</label>
-    <input type="datetime-local" name="start_date">
+        <input type="text" name="poster" placeholder="Poster URL">
 
-    <label>End Date</label>
-    <input type="datetime-local" name="end_date">
+        <input type="text" name="venue" placeholder="Venue">
 
-    <input type="text" name="venue" placeholder="Venue">
+        <input type="text" name="location" placeholder="Location">
 
-    <input type="text" name="venue_sub" placeholder="Venue Detail">
+        <label>Registration Deadline</label>
+        <input type="date" name="registration_deadline" required>
 
-    <input type="text" name="location" placeholder="Location">
+        <label>Start Date</label>
+        <input type="date" name="start_date" required>
 
-    <input type="text" name="prize" placeholder="Prize">
+        <label>End Date</label>
+        <input type="date" name="end_date" required>
 
-    <select name="status">
-        <option value="Open">Open</option>
-        <option value="Running">Running</option>
-        <option value="Finished">Finished</option>
-    </select>
+        <label>Status</label>
+        <select name="status">
+            <option value="upcoming">Upcoming</option>
+            <option value="ongoing">Ongoing</option>
+            <option value="finished">Finished</option>
+        </select>
 
-    <input type="text" name="poster" placeholder="Poster URL">
+        <input type="number" name="prize_pool" placeholder="Prize Pool" step="0.01" min="0">
 
-    <textarea
-        name="tags"
-        placeholder="Beginner,Padel,2026"></textarea>
+        <button type="submit">
+            Create Tournament
+        </button>
 
-    <button>Create Tournament</button>
+    </form>
 
-</form>
+    <br>
 
-<br>
-
-<a href="{{ route('tournaments.index') }}">
-Back
-</a>
+    <a href="{{ route('tournaments.index') }}">
+        Back
+    </a>
 
 </body>
+
 </html>

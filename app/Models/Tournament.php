@@ -7,27 +7,21 @@ use Illuminate\Database\Eloquent\Model;
 class Tournament extends Model
 {
     protected $fillable = [
-        'name',
-        'badge',
+        'title',
+        'description',
+        'poster',
+        'venue',
+        'location',
         'start_date',
         'end_date',
-        'venue',
-        'venue_sub',
-        'location',
-        'prize',
+        'registration_deadline',
         'status',
-        'poster',
-        'tags'
+        'prize_pool',
+        'created_by'
     ];
 
-    protected $casts = [
-        'tags' => 'array',
-        'start_date' => 'datetime',
-        'end_date' => 'datetime',
-    ];
-
-   public function categories()
-{
-    return $this->hasMany(Category::class);
-}
+    public function categories()
+    {
+        return $this->hasMany(Category::class);
+    }
 }

@@ -19,8 +19,11 @@ use App\Http\Controllers\Admin\TournamentController as AdminTournamentController
 Route::prefix('api/v1')->group(function () {
 
     Route::get('/players', [ApiPlayerController::class, 'index']);
-    Route::get('/players/{id}', [ApiPlayerController::class, 'show']);
+    Route::get('/players/test', function () {
+        return response()->json(['ok' => true]);
+    });
     Route::get('/players/leaders', [ApiPlayerController::class, 'leaders']);
+    Route::get('/players/{id}', [ApiPlayerController::class, 'show']);
 
     Route::get('/tournaments', [TournamentController::class, 'index']);
     Route::get('/tournaments/{id}', [TournamentController::class, 'show']);
