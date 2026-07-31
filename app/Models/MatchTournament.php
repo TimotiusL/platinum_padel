@@ -16,11 +16,15 @@ class MatchTournament extends Model
         'round',
         'court',
         'match_date',
-        'status'
+        'status',
+        'score_team_a',
+        'score_team_b',
     ];
 
     protected $casts = [
         'match_date' => 'datetime',
+        'score_team_a' => 'integer',
+        'score_team_b' => 'integer',
     ];
 
     public function category()

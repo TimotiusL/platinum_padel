@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\PlayerController;
 use App\Http\Controllers\Api\MatchController;
 use App\Http\Controllers\Api\TournamentController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\LeaderboardController;
 
 // Public API - No auth needed
 Route::prefix('v1')->group(function () {
@@ -21,4 +22,6 @@ Route::prefix('v1')->group(function () {
     Route::get('/matches', [MatchController::class, 'index']);
     Route::get('/matches/{id}', [MatchController::class, 'show']);
     Route::get('/matches/bracket/{tournamentId}', [MatchController::class, 'bracket']);
+
+    Route::get('/leaderboard', [LeaderboardController::class, 'index']);
 });

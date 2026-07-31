@@ -9,7 +9,10 @@ use App\Http\Controllers\Api\MatchController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\PlayerController as AdminPlayerController;
 use App\Http\Controllers\Admin\TournamentController as AdminTournamentController;
+use App\Http\Controllers\Admin\ScoreboardController;
+use App\Http\Controllers\Admin\MatchController as AdminMatchController;
 
+use App\Http\Controllers\Admin\CategoryController;
 /*
 |--------------------------------------------------------------------------
 | API ROUTES
@@ -19,9 +22,6 @@ use App\Http\Controllers\Admin\TournamentController as AdminTournamentController
 Route::prefix('api/v1')->group(function () {
 
     Route::get('/players', [ApiPlayerController::class, 'index']);
-    Route::get('/players/test', function () {
-        return response()->json(['ok' => true]);
-    });
     Route::get('/players/leaders', [ApiPlayerController::class, 'leaders']);
     Route::get('/players/{id}', [ApiPlayerController::class, 'show']);
 
@@ -56,6 +56,20 @@ Route::prefix('admin')->group(function () {
         Route::resource('players', AdminPlayerController::class);
         Route::resource('tournaments', AdminTournamentController::class);
 
+        Route::get('/scoreboard', [ScoreboardController::class, 'index'])
+            ->name('scoreboard.index');
+
+        Route::post('/scoreboard/{match}', [ScoreboardController::class, 'update'])
+            ->name('scoreboard.update');
+
+        Route::post('/generate-match/{category}', [AdminMatchController::class, 'generate'])
+            ->name('matches.generate');
+
+        Route::get('/categories', [CategoryController::class, 'index'])
+            ->name('categories.index');
+
+        Route::get('/matches/{category}', [AdminMatchController::class, 'index'])
+            ->name('matches.index');
     });
 
 });
@@ -68,3 +82,4 @@ Route::prefix('admin')->group(function () {
 */
 
 Route::view('/{any}', 'app')->where('any', '^(?!api|admin).*$');
+
