@@ -9,7 +9,7 @@ class CategoryController extends Controller
 {
     public function index()
     {
-        $categories = Category::withCount('teams')
+        $categories = Category::with('tournament')->withCount('teams')
             ->orderBy('name')
             ->get();
 

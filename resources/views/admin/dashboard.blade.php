@@ -129,8 +129,8 @@
                 <div class="stat">{{ \App\Models\Team::count() }}</div>
                 <div>Teams</div>
 
-                <a href="#" class="disabled">
-                    Coming Soon
+                <a href="{{ route('categories.index') }}">
+                    View Categories
                 </a>
             </div>
 
@@ -138,8 +138,8 @@
                 <div class="stat">{{ \App\Models\MatchTournament::count() }}</div>
                 <div>Matches</div>
 
-                <a href="#" class="disabled">
-                    Coming Soon
+                <a href="{{ route('matches.index') }}">
+                    Manage
                 </a>
             </div>
 

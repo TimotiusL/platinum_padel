@@ -1,399 +1,146 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="id">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Live Scoreboard - Platinum Padel</title>
-
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            background: #0c1e17;
-            color: #f2ecdd;
-            font-family: 'Inter', sans-serif;
-        }
-
-        .container {
-            width: 90%;
-            max-width: 1100px;
-            margin: 40px auto;
-        }
-
-        .top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 35px;
-        }
-
-        h1 {
-            color: #c9a766;
-            margin: 0;
-        }
-
-        .back {
-            color: #c9a766;
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        .match-card {
-
-            background: #173a2e;
-
-            border: 1px solid rgba(201, 167, 102, .18);
-
-            border-radius: 14px;
-
-            padding: 28px;
-
-            margin-bottom: 30px;
-        }
-
-        .match-header {
-
-            display: flex;
-
-            justify-content: space-between;
-
-            margin-bottom: 30px;
-
-            color: #c9a766;
-
-            font-weight: bold;
-
-        }
-
-        .status {
-
-            background: #1f8b4c;
-
-            padding: 5px 12px;
-
-            border-radius: 20px;
-
-            font-size: 13px;
-        }
-
-        .scoreboard {
-
-            display: grid;
-
-            grid-template-columns: 1fr 250px 1fr;
-
-            align-items: center;
-
-            gap: 20px;
-        }
-
-        .team {
-
-            text-align: center;
-        }
-
-        .team h2 {
-
-            margin-bottom: 25px;
-
-            font-size: 28px;
-        }
-
-        .controls {
-
-            display: flex;
-
-            justify-content: center;
-
-            align-items: center;
-
-            gap: 15px;
-        }
-
-        .controls button {
-
-            width: 45px;
-
-            height: 45px;
-
-            border: none;
-
-            border-radius: 10px;
-
-            background: #c9a766;
-
-            cursor: pointer;
-
-            font-size: 24px;
-
-            font-weight: bold;
-        }
-
-        .controls input {
-
-            width: 70px;
-
-            height: 60px;
-
-            text-align: center;
-
-            font-size: 28px;
-
-            border: none;
-
-            border-radius: 10px;
-
-            background: white;
-        }
-
-        .middle {
-
-            text-align: center;
-        }
-
-        .vs {
-
-            font-size: 32px;
-
-            font-weight: bold;
-
-            color: #c9a766;
-        }
-
-        .save {
-
-            margin-top: 30px;
-
-            text-align: center;
-        }
-
-        .save button {
-
-            background: #c9a766;
-
-            color: #0c1e17;
-
-            border: none;
-
-            padding: 14px 30px;
-
-            border-radius: 10px;
-
-            font-size: 16px;
-
-            font-weight: bold;
-
-            cursor: pointer;
-        }
-
-        .empty {
-
-            background: #173a2e;
-
-            padding: 25px;
-
-            border-radius: 12px;
-
-            text-align: center;
+        *{box-sizing:border-box}
+        body{margin:0;background:#0c1e17;color:#f2ecdd;font-family:Inter,sans-serif}
+        .container{width:92%;max-width:1150px;margin:34px auto}
+        .top{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:22px}
+        h1{color:#c9a766;margin:0}
+        a{text-decoration:none;color:inherit}
+        .back{color:#c9a766;font-weight:700}
+        .filter{display:grid;grid-template-columns:1fr auto;gap:10px;background:#173a2e;border-radius:12px;padding:14px;margin-bottom:20px}
+        select{background:#0f2a21;color:#f2ecdd;border:1px solid rgba(201,167,102,.32);border-radius:8px;padding:11px}
+        .btn{border:0;border-radius:9px;padding:11px 17px;background:#c9a766;color:#0c1e17;font-weight:800;cursor:pointer;text-decoration:none}
+        .match-card{background:#173a2e;border:1px solid rgba(201,167,102,.22);border-radius:16px;padding:26px;margin-bottom:22px}
+        .match-header{display:flex;justify-content:space-between;gap:10px;color:#c9a766;font-weight:700;margin-bottom:26px}
+        .status{padding:6px 11px;border-radius:999px;font-size:11px;color:white}
+        .status.scheduled{background:#746640}.status.ongoing{background:#1f8b4c}.status.finished{background:#37526d}
+        .scoreboard{display:grid;grid-template-columns:1fr 130px 1fr;align-items:center;gap:24px}
+        .team{text-align:center}
+        .team-code{font-size:30px;color:#e6cf9c;font-weight:800;margin-bottom:9px}
+        .player{font-size:16px;font-weight:600;margin:5px 0}
+        .controls{display:flex;justify-content:center;align-items:center;gap:12px;margin-top:20px}
+        .controls button{width:46px;height:46px;border:0;border-radius:10px;background:#c9a766;font-size:24px;font-weight:800;cursor:pointer}
+        .controls input{width:82px;height:66px;text-align:center;font-size:32px;font-weight:800;border:0;border-radius:10px;background:white;color:#0c1e17}
+        .vs{text-align:center;color:#c9a766;font-size:30px;font-weight:800}
+        .save{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:28px}
+        .finish{background:#1f8b4c;color:white}
+        .empty,.notice{background:#173a2e;padding:20px;border-radius:12px;text-align:center}
+        .notice{background:#1f8b4c;margin-bottom:18px;text-align:left}
+        .error{background:#963f3f}
+        @media(max-width:760px){
+            .filter{grid-template-columns:1fr}
+            .scoreboard{grid-template-columns:1fr}
+            .vs{margin:4px 0}
+            .match-card{padding:20px}
         }
     </style>
-
 </head>
-
 <body>
-
-    <div class="container">
-        @if(session('success'))
-
-            <div style="
-                        background:#1f8b4c;
-                        padding:15px;
-                        margin-bottom:20px;
-                        border-radius:10px;
-                        ">
-
-                {{ session('success') }}
-
-            </div>
-
-        @endif
-        <div class="top">
-
-            <h1>🏆 Live Scoreboard</h1>
-
-            <a href="{{ route('admin.dashboard') }}" class="back">
-                ← Dashboard
-            </a>
-
+<div class="container">
+    <div class="top">
+        <h1>🏆 Live Scoreboard</h1>
+        <div>
+            <a class="back" href="{{ route('matches.index') }}">Matches</a>
+            <span style="opacity:.4;margin:0 8px">|</span>
+            <a class="back" href="{{ route('admin.dashboard') }}">Dashboard</a>
         </div>
-
-        @forelse($matches as $match)
-
-                <div class="match-card">
-
-                    <div class="match-header">
-
-                        <div>
-
-                            Court {{ $match->court }}
-
-                            |
-
-                            {{ ucfirst($match->round) }}
-
-                        </div>
-
-                        <div class="status">
-
-                            {{ strtoupper($match->status) }}
-
-                        </div>
-
-                    </div>
-
-                    <form action="{{ route('scoreboard.update', $match->id) }}" method="POST">
-
-                        @csrf
-
-                        <div class="scoreboard">
-
-                            <div class="team">
-
-                                <div class="team">
-
-                                    <h2>{{ $match->teamA->team_code }}</h2>
-
-                                    @foreach($match->teamA->members as $member)
-
-                                        <div style="margin:8px 0;font-size:18px;font-weight:bold;">
-
-                                            {{ $member->player->user->name }}
-
-                                        </div>
-
-                                    @endforeach
-
-                                </div>
-
-                                <div class="controls">
-
-                                    <button type="button" onclick="minus('a{{ $match->id }}')">-</button>
-
-                                    <input id="a{{ $match->id }}" type="number" min="0" name="score_team_a"
-                                        value="{{ $match->score_team_a }}">
-
-                                    <button type="button" onclick="plus('a{{ $match->id }}')">+</button>
-
-                                </div>
-
-                            </div>
-
-                            <div class="middle">
-
-                                <div class="vs">
-                                    VS
-                                </div>
-
-                            </div>
-
-                            <div class="team">
-
-                                <div class="team">
-
-                                    <h2>{{ $match->teamB->team_code }}</h2>
-
-                                    @foreach($match->teamB->members as $member)
-
-                                        <div style="margin:8px 0;font-size:18px;font-weight:bold;">
-
-                                            {{ $member->player->user->name }}
-
-                                        </div>
-
-                                    @endforeach
-
-                                </div>
-
-                                <div class="controls">
-
-                                    <button type="button" onclick="minus('b{{ $match->id }}')">-</button>
-
-                                    <input id="b{{ $match->id }}" type="number" min="0" name="score_team_b"
-                                        value="{{ $match->score_team_b }}">
-
-                                    <button type="button" onclick="plus('b{{ $match->id }}')">+</button>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                        <div class="save">
-
-                            <button>
-
-                                💾 Save Score
-
-                            </button>
-
-                            <button type="submit" name="finish" value="1" style="
-                margin-top:10px;
-                background:#1f8b4c;
-                color:white;
-                border:none;
-                padding:14px 30px;
-                border-radius:10px;
-                cursor:pointer;
-            ">
-                                ✅ Finish Match
-                            </button>
-                        </div>
-
-                    </form>
-
-                </div>
-
-        @empty
-
-            <div class="empty">
-
-                Belum ada pertandingan.
-
-            </div>
-
-        @endforelse
-
     </div>
 
-    <script>
+    @if(session('success')) <div class="notice">{{ session('success') }}</div> @endif
+    @if($errors->any()) <div class="notice error">{{ $errors->first() }}</div> @endif
 
-        function plus(id) {
+    <form class="filter" method="GET">
+        <select name="category_id">
+            <option value="">All Categories</option>
+            @foreach($categories as $category)
+                <option value="{{ $category->id }}" @selected(request('category_id') == $category->id)>
+                    {{ $category->tournament?->title }} — {{ $category->name }}
+                </option>
+            @endforeach
+        </select>
+        <button class="btn" type="submit">Filter</button>
+    </form>
 
-            let x = document.getElementById(id);
+    @forelse($matches as $match)
+        <article class="match-card">
+            <div class="match-header">
+                <div>
+                    {{ $match->category?->name }} · {{ strtoupper($match->round) }} · {{ $match->court ?: 'Court TBD' }}
+                    @if($match->match_date)
+                        <div style="font-size:12px;color:rgba(242,236,221,.55);margin-top:6px">
+                            {{ $match->match_date->format('d M Y H:i') }}
+                        </div>
+                    @endif
+                </div>
+                <span class="status {{ $match->status }}">{{ strtoupper($match->status) }}</span>
+            </div>
 
-            x.value = parseInt(x.value) + 1;
+            <form action="{{ route('scoreboard.update', $match) }}" method="POST">
+                @csrf
+                <input type="hidden" name="stay_on_match" value="{{ $match->id }}">
 
-        }
+                <div class="scoreboard">
+                    <div class="team">
+                        <div class="team-code">{{ $match->teamA?->team_code ?? 'TBD' }}</div>
+                        @forelse($match->teamA?->members ?? [] as $member)
+                            <div class="player">{{ $member->player?->user?->name ?? '?' }}</div>
+                        @empty
+                            <div class="player">Belum ada pemain</div>
+                        @endforelse
 
-        function minus(id) {
+                        <div class="controls">
+                            <button type="button" onclick="changeScore('a{{ $match->id }}', -1)">−</button>
+                            <input id="a{{ $match->id }}" type="number" min="0" max="255"
+                                   name="score_team_a" value="{{ $match->score_team_a }}">
+                            <button type="button" onclick="changeScore('a{{ $match->id }}', 1)">+</button>
+                        </div>
+                    </div>
 
-            let x = document.getElementById(id);
+                    <div class="vs">VS</div>
 
-            if (parseInt(x.value) > 0) {
+                    <div class="team">
+                        <div class="team-code">{{ $match->teamB?->team_code ?? 'TBD' }}</div>
+                        @forelse($match->teamB?->members ?? [] as $member)
+                            <div class="player">{{ $member->player?->user?->name ?? '?' }}</div>
+                        @empty
+                            <div class="player">Belum ada pemain</div>
+                        @endforelse
 
-                x.value = parseInt(x.value) - 1;
+                        <div class="controls">
+                            <button type="button" onclick="changeScore('b{{ $match->id }}', -1)">−</button>
+                            <input id="b{{ $match->id }}" type="number" min="0" max="255"
+                                   name="score_team_b" value="{{ $match->score_team_b }}">
+                            <button type="button" onclick="changeScore('b{{ $match->id }}', 1)">+</button>
+                        </div>
+                    </div>
+                </div>
 
-            }
+                <div class="save">
+                    <button class="btn" type="submit">💾 Save Live Score</button>
+                    <button class="btn finish" type="submit" name="finish" value="1"
+                            onclick="return confirm('Selesaikan pertandingan dan update bracket?')">
+                        ✅ {{ $match->status === 'finished' ? 'Update Finished Match' : 'Finish Match' }}
+                    </button>
+                </div>
+            </form>
+        </article>
+    @empty
+        <div class="empty">Belum ada pertandingan. Buat match melalui menu Matches.</div>
+    @endforelse
+</div>
 
-        }
-
-    </script>
-
+<script>
+    function changeScore(id, delta) {
+        const input = document.getElementById(id);
+        const current = Number.parseInt(input.value || '0', 10);
+        input.value = Math.max(0, current + delta);
+    }
+</script>
 </body>
-
 </html>

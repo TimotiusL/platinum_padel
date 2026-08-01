@@ -5,7 +5,11 @@ const API_URL = "/api/v1";
 let LEADERBOARD = [];
 let PLAYERS = [];
 let TOURNAMENTS = [];
-let GROUPS = {};
+let GROUPS = {}; // roster teams, used by Players page
+let GROUP_MATCHES = {};
+let CATEGORY_DATA = {};
+let CURRENT_TOURNAMENT = null;
+let tournamentLiveTimer = null;
 let R16 = [];
 let QF = [];
 let SF = [];
@@ -28,15 +32,9 @@ const ICONS = {
 };
 
 /* ============================= CATEGORIES (TETAP SAMA) ============================= */
-const CATEGORIES = [
-    { id: "rookie-men", label: "Rookie", tier: "Men" },
-    { id: "bronze-men", label: "Bronze", tier: "Men" },
-    { id: "upper-women", label: "Upper Beginner", tier: "Women" },
-    { id: "open-men", label: "Open", tier: "Men" },
-    { id: "open-women", label: "Open", tier: "Women" },
-];
+let CATEGORIES = [];
 
-let currentCat = "open-men";
+let currentCat = null;
 let currentTab = "results";
 
 /* ============================= API HELPER ============================= */
@@ -51,12 +49,12 @@ async function fetchAPI(endpoint) {
     }
 }
 
-async function loadLeaderboard() {
-    const data = await fetchAPI("/leaderboard");
+async function loadLeaderboard(categoryId = currentCat) {
+    const query = categoryId ? `?category_id=${encodeURIComponent(categoryId)}` : "";
+    const data = await fetchAPI(`/leaderboard${query}`);
 
     if (data?.leaderboard) {
         LEADERBOARD = data.leaderboard;
-
         console.log("✅ Leaderboard loaded:", LEADERBOARD.length);
     }
 }
@@ -202,46 +200,34 @@ function esc(s) {
 function matchCard(m, cat, lap) {
     if (!m) return "";
 
-    // Get team names
-    let team1Names = ["?", "?"];
-    let team2Names = ["?", "?"];
-    let team1Code = m.team1?.code || "";
-    let team2Code = m.team2?.code || "";
+    const team1Names = m.team1
+        ? [m.team1.player1?.name || "?", m.team1.player2?.name || "?"]
+        : ["?", "?"];
+    const team2Names = m.team2
+        ? [m.team2.player1?.name || "?", m.team2.player2?.name || "?"]
+        : ["?", "?"];
 
-    if (m.team1) {
-        team1Names = [
-            m.team1.player1?.name || "?",
-            m.team1.player2?.name || "?",
-        ];
-    }
-    if (m.team2) {
-        team2Names = [
-            m.team2.player1?.name || "?",
-            m.team2.player2?.name || "?",
-        ];
-    }
-
-    const s1 = m.score1 !== undefined ? m.score1 : "-";
-    const s2 = m.score2 !== undefined ? m.score2 : "-";
+    const team1Code = m.team1?.code || "";
+    const team2Code = m.team2?.code || "";
+    const isScheduled = m.status === "scheduled";
+    const s1 = isScheduled ? "-" : (m.score1 ?? 0);
+    const s2 = isScheduled ? "-" : (m.score2 ?? 0);
     const winner = m.winner_id || 0;
-    const team1Id = m.team1_id || 0;
-    const team2Id = m.team2_id || 0;
-    const time = m.scheduled_at ? formatTime(m.scheduled_at) : "TBD";
 
     return `
     <div class="m-card">
         <div class="m-top">
-            <span class="cat">${cat || "MEN · GROUP STAGE"}</span>
-            <span class="lap">${lap || "LAP 2"}</span>
+            <span class="cat">${cat || "GROUP STAGE"}</span>
+            <span class="lap">${lap || m.court || "COURT TBD"}</span>
         </div>
-        <div class="m-team ${winner === team1Id ? "winner" : ""}">
+        <div class="m-team ${winner === m.team1_id ? "winner" : ""}">
             <div class="names">
                 ${team1Code ? `<span class="team-code">${team1Code}</span>` : ""}
                 ${team1Names[0]}<br>${team1Names[1]}
             </div>
             <div class="score">${s1}</div>
         </div>
-        <div class="m-team ${winner === team2Id ? "winner" : ""}">
+        <div class="m-team ${winner === m.team2_id ? "winner" : ""}">
             <div class="names">
                 ${team2Code ? `<span class="team-code">${team2Code}</span>` : ""}
                 ${team2Names[0]}<br>${team2Names[1]}
@@ -250,11 +236,11 @@ function matchCard(m, cat, lap) {
         </div>
         <div class="m-divider"></div>
         <div class="m-meta">
-            <span>1 SET · FIRST6 · GP</span>
-            <span>${ICONS.check}</span>
+            <span>${String(m.status || "scheduled").toUpperCase()} · ${String(m.round || "group").toUpperCase()}</span>
+            <span>${m.status === "finished" ? ICONS.check : ""}</span>
         </div>
         <div style="padding:0 18px 14px; font-family:var(--ui); font-size:11px; color:var(--cream-faint);">
-            ${m.scheduled_at ? formatDate(m.scheduled_at) + " pukul " + formatTime(m.scheduled_at) : "TBD"}
+            ${m.scheduled_at ? formatDate(m.scheduled_at) + " pukul " + formatTime(m.scheduled_at) : "Jadwal belum ditentukan"}
         </div>
         <button class="m-detail-btn" onclick="location.hash='#/match/${m.id}'">See Match Detail</button>
     </div>`;
@@ -437,19 +423,21 @@ function viewTournaments() {
 }
 
 function viewTournamentDetail(id) {
-    const t = TOURNAMENTS.find((x) => x.id == id) ||
-        TOURNAMENTS[0] || { name: "Tournament", badge: "PLATINUM" };
+    const t = CURRENT_TOURNAMENT ||
+        TOURNAMENTS.find((x) => x.id == id) ||
+        TOURNAMENTS[0] ||
+        { name: "Tournament", badge: "PLATINUM" };
 
     return `
     <a class="back-link" href="#/tournaments">${ICONS.back} Kembali ke Tournaments</a>
     <div class="t-banner">
         <div class="poster-lg" style="background:${t.poster || "linear-gradient(160deg,#173a2e,#0c1e17)"}"></div>
         <div class="info">
-            <div class="badge">| ${t.badge || "PLATINUM SOCIETAS"}</div>
-            <h1>${t.name}</h1>
+            <div class="badge">| ${t.badge || "PLATINUM PADEL"}</div>
+            <h1>${t.name || t.title || "Tournament"}</h1>
             <div class="row">${ICONS.calendar} ${formatDateRange(t.start_date, t.end_date)}</div>
-            <div class="row">${ICONS.court} ${t.venue || "Platinum Padel Court"}<br></div>
-            <div class="row">${ICONS.pin} ${t.location || "Jakarta"}</div>
+            <div class="row">${ICONS.court} ${t.venue || "Platinum Padel Court"}</div>
+            <div class="row">${ICONS.pin} ${t.location || "TBD"}</div>
         </div>
     </div>
 
@@ -457,7 +445,9 @@ function viewTournamentDetail(id) {
         <div class="eyebrow dim">Pilih Kategori</div>
     </div>
     <div class="cat-row" id="catRow">
-        ${CATEGORIES.map((c) => `<button class="cat-btn ${c.id === currentCat ? "active" : ""}" data-cat="${c.id}">${ICONS.trophy} ${c.label} <span class="t">— ${c.tier}</span></button>`).join("")}
+        ${CATEGORIES.length
+            ? CATEGORIES.map((c) => `<button class="cat-btn ${String(c.id) === String(currentCat) ? "active" : ""}" data-cat="${c.id}">${ICONS.trophy} ${c.label} <span class="t">— ${c.tier}</span></button>`).join("")
+            : `<div class="empty">Belum ada kategori.</div>`}
     </div>
 
     <div class="tab-row" id="tabRow">
@@ -476,87 +466,98 @@ function renderTabContent() {
     return "";
 }
 
-function renderResults(isFixture) {
-    // Get all matches from all stages
-    const allMatches = { ...GROUPS };
+function renderResults(isFixture = false) {
+    const includeMatch = (match) =>
+        isFixture ? match.status !== "finished" : match.status === "finished";
+
+    const groupMatches = {};
+    Object.keys(GROUP_MATCHES).forEach((group) => {
+        const filtered = (GROUP_MATCHES[group] || []).filter(includeMatch);
+        if (filtered.length) groupMatches[group] = filtered;
+    });
+
+    const stages = {
+        r16: R16.filter(includeMatch),
+        qf: QF.filter(includeMatch),
+        sf: SF.filter(includeMatch),
+        final: FINAL.filter(includeMatch),
+    };
+
+    const groupCount = Object.values(groupMatches).reduce((total, list) => total + list.length, 0);
+    const total = groupCount + Object.values(stages).reduce((sum, list) => sum + list.length, 0);
+
+    if (total === 0) {
+        return `<div class="empty">${isFixture ? "Belum ada fixture aktif." : "Belum ada hasil pertandingan."}</div>`;
+    }
+
+    const categoryName = CATEGORIES.find((category) => String(category.id) === String(currentCat))?.label || "CATEGORY";
 
     return `
     <div class="acc open" data-acc="group">
         <div class="acc-head" onclick="toggleAcc(this.parentElement)">
             <span>Group Stage</span>
-            <span class="count">${isFixture ? "12 Match" : "12 Match"} ${ICONS.chev}</span>
+            <span class="count">${groupCount} Match ${ICONS.chev}</span>
         </div>
         <div class="acc-body">
-            ${Object.keys(GROUPS)
-                .map(
-                    (g) => `
-                <div class="sub-acc ${g === "A" ? "open" : ""}">
-                    <div class="sub-head" onclick="toggleSubAcc(this.parentElement)">Group ${g} <span style="color:var(--cream-faint); font-weight:400;">${GROUPS[g]?.length || 0} match ${ICONS.chev}</span></div>
-                    <div class="sub-body">
-                        ${(GROUPS[g] || []).map((m) => matchCard(m)).join("")}
+            ${Object.keys(groupMatches).map((group, index) => `
+                <div class="sub-acc ${index === 0 ? "open" : ""}">
+                    <div class="sub-head" onclick="toggleSubAcc(this.parentElement)">
+                        Group ${group}
+                        <span style="color:var(--cream-faint); font-weight:400;">
+                            ${groupMatches[group].length} match ${ICONS.chev}
+                        </span>
                     </div>
-                </div>`,
-                )
-                .join("")}
+                    <div class="sub-body">
+                        ${groupMatches[group].map((match) => matchCard(match, `${categoryName.toUpperCase()} · GROUP ${group}`, match.court || "COURT")).join("")}
+                    </div>
+                </div>
+            `).join("") || `<div class="empty">Tidak ada match group pada tab ini.</div>`}
         </div>
     </div>
-    <div class="acc" data-acc="r16">
-        <div class="acc-head" onclick="toggleAcc(this.parentElement)"><span>Round of 16</span><span class="count">${R16.length} Match ${ICONS.chev}</span></div>
-        <div class="acc-body"><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px;">${R16.map((m) => matchCard(m, "MEN · ROUND OF 16", "LAP 3")).join("")}</div></div>
-    </div>
-    <div class="acc" data-acc="qf">
-        <div class="acc-head" onclick="toggleAcc(this.parentElement)"><span>Quarter Final</span><span class="count">${QF.length} Match ${ICONS.chev}</span></div>
-        <div class="acc-body"><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px;">${QF.map((m) => matchCard(m, "MEN · QUARTER FINAL", "LAP 4")).join("")}</div></div>
-    </div>
-    <div class="acc" data-acc="sf">
-        <div class="acc-head" onclick="toggleAcc(this.parentElement)"><span>Semi Final</span><span class="count">${SF.length} Match ${ICONS.chev}</span></div>
-        <div class="acc-body"><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px;">${SF.map((m) => matchCard(m, "MEN · SEMI FINAL", "LAP 5")).join("")}</div></div>
-    </div>
-    <div class="acc" data-acc="final">
-        <div class="acc-head" onclick="toggleAcc(this.parentElement)"><span>Final</span><span class="count">${FINAL.length} Match ${ICONS.chev}</span></div>
-        <div class="acc-body"><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px;">${FINAL.map((m) => matchCard(m, "MEN · FINAL", "LAP 6")).join("")}</div></div>
-    </div>
+
+    ${[
+        ["r16", "Round of 16", "ROUND OF 16"],
+        ["qf", "Quarter Final", "QUARTER FINAL"],
+        ["sf", "Semi Final", "SEMI FINAL"],
+        ["final", "Final", "FINAL"],
+    ].map(([key, title, label]) => `
+        <div class="acc" data-acc="${key}">
+            <div class="acc-head" onclick="toggleAcc(this.parentElement)">
+                <span>${title}</span>
+                <span class="count">${stages[key].length} Match ${ICONS.chev}</span>
+            </div>
+            <div class="acc-body">
+                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px;">
+                    ${stages[key].map((match) => matchCard(match, `${categoryName.toUpperCase()} · ${label}`, match.court || "COURT")).join("") || `<div class="empty">Belum ada match.</div>`}
+                </div>
+            </div>
+        </div>
+    `).join("")}
     `;
 }
 
 function renderMiniLeaderboard() {
     if (LEADERBOARD.length === 0) {
-        return `<div class="empty">No leaderboard</div>`;
+        return `<div class="empty">Belum ada leaderboard.</div>`;
     }
 
     return `
         <div class="p-grid">
-
-            ${LEADERBOARD.map(
-                (team, index) => `
-
+            ${LEADERBOARD.map((team, index) => `
                 <div class="p-row">
-
-                    <div class="p-rank">${index + 1}</div>
-
+                    <div class="p-rank ${index < 3 ? "top" : ""}">${index + 1}</div>
                     <div class="p-info">
-
-                        <div class="nm">${team.team_code}</div>
-
-                        <div class="loc">
-
-                            ${team.players.join("<br>")}
-
+                        <div class="nm">${team.team_code || team.team_name}</div>
+                        <div class="loc">${(team.players || []).join("<br>")}</div>
+                        <div style="margin-top:7px;font-family:var(--ui);font-size:10px;color:var(--cream-faint);">
+                            Main ${team.played || 0} · Menang ${team.win || 0} · Kalah ${team.lose || 0}
                         </div>
-
                     </div>
-
                     <div class="p-titles">
-
-                        ${team.points} Points
-
+                        ${ICONS.trophy} ${team.total_score || 0} Score
                     </div>
-
                 </div>
-
-            `,
-            ).join("")}
-
+            `).join("")}
         </div>
     `;
 }
@@ -947,19 +948,26 @@ function attachTournamentHandlers() {
     document.querySelectorAll("#catRow .cat-btn").forEach((btn) => {
         btn.addEventListener("click", () => {
             currentCat = btn.dataset.cat;
+            applyCategoryData(currentCat);
+
             document
                 .querySelectorAll("#catRow .cat-btn")
-                .forEach((b) => b.classList.remove("active"));
+                .forEach((button) => button.classList.remove("active"));
             btn.classList.add("active");
+
+            const content = document.getElementById("tabContent");
+            if (content) content.innerHTML = renderTabContent();
         });
     });
+
     document.querySelectorAll("#tabRow .tab-btn").forEach((btn) => {
         btn.addEventListener("click", () => {
             currentTab = btn.dataset.tab;
             document
                 .querySelectorAll("#tabRow .tab-btn")
-                .forEach((b) => b.classList.remove("active"));
+                .forEach((button) => button.classList.remove("active"));
             btn.classList.add("active");
+
             const content = document.getElementById("tabContent");
             if (content) content.innerHTML = renderTabContent();
         });
@@ -1038,37 +1046,62 @@ async function loadTournamentsOnly() {
     }
 }
 
+
+function applyCategoryData(categoryId) {
+    const selected = CATEGORY_DATA[String(categoryId)] || {};
+    const matches = selected.matches || {};
+
+    GROUP_MATCHES = matches.group || {};
+    R16 = matches.r16 || [];
+    QF = matches.qf || [];
+    SF = matches.sf || [];
+    FINAL = matches.final || [];
+    LEADERBOARD = selected.leaderboard || [];
+}
+
 // Load tournament detail
 async function loadTournamentDetail(id) {
     console.log("🔄 Loading tournament detail...");
     const data = await fetchAPI(`/tournaments/${id}?with=teams,matches`);
-    if (data) {
-        const teams = data.teams || {};
-        GROUPS = {};
-        Object.keys(teams).forEach((groupCode) => {
-            GROUPS[groupCode] = teams[groupCode].map((team) => ({
-                code: team.code,
-                players: team.players || [
-                    team.player1?.name || "?",
-                    team.player2?.name || "?",
-                ],
-            }));
-        });
 
-        const matches = data.matches || {};
-        R16 = matches.r16 || [];
-        QF = matches.qf || [];
-        SF = matches.sf || [];
-        FINAL = matches.final || [];
-        console.log("✅ Tournament detail loaded");
+    if (!data) return;
+
+    CURRENT_TOURNAMENT = data.tournament || null;
+
+    if (CURRENT_TOURNAMENT) {
+        const existingIndex = TOURNAMENTS.findIndex((tournament) => tournament.id == CURRENT_TOURNAMENT.id);
+        if (existingIndex >= 0) {
+            TOURNAMENTS[existingIndex] = CURRENT_TOURNAMENT;
+        } else {
+            TOURNAMENTS.push(CURRENT_TOURNAMENT);
+        }
     }
-    await loadLeaderboard();
+
+    CATEGORIES = data.categories || [];
+    CATEGORY_DATA = data.category_data || {};
+    GROUPS = data.teams || {};
+
+    const categoryExists = CATEGORIES.some(
+        (category) => String(category.id) === String(currentCat),
+    );
+
+    if (!categoryExists) {
+        currentCat = CATEGORIES[0]?.id ?? null;
+    }
+
+    applyCategoryData(currentCat);
+    console.log("✅ Tournament detail loaded");
 }
 
 async function router() {
     if (homeCountdownTimer) {
         window.clearInterval(homeCountdownTimer);
         homeCountdownTimer = null;
+    }
+
+    if (tournamentLiveTimer) {
+        window.clearInterval(tournamentLiveTimer);
+        tournamentLiveTimer = null;
     }
 
     const hash = location.hash || "#/";
@@ -1098,6 +1131,14 @@ async function router() {
         app.innerHTML = viewTournamentDetail(id);
         updateNav("tournaments");
         setTimeout(attachTournamentHandlers, 100);
+
+        tournamentLiveTimer = window.setInterval(async () => {
+            if (location.hash !== `#/tournament/${id}`) return;
+
+            await loadTournamentDetail(id);
+            const content = document.getElementById("tabContent");
+            if (content) content.innerHTML = renderTabContent();
+        }, 3000);
     } else if (hash.startsWith("#/match/")) {
         const id = hash.split("/")[2];
         app.innerHTML = `<div class="empty" style="padding:80px 20px;">⏳ Loading match...</div>`;

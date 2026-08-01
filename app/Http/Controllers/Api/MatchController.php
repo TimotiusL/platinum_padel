@@ -1,60 +1,105 @@
 <?php
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\MatchTournament;
+use App\Services\TournamentService;
 use Illuminate\Http\Request;
 
 class MatchController extends Controller
 {
+    public function __construct(private readonly TournamentService $tournamentService)
+    {
+    }
+
     public function index(Request $request)
     {
-        $query = MatchTournament::with(['team1.player1', 'team1.player2', 'team2.player1', 'team2.player2', 'winner']);
+        $query = MatchTournament::with([
+            'category',
+            'teamA.members.player.user',
+            'teamB.members.player.user',
+            'winner.members.player.user',
+        ]);
 
-        if ($request->has('tournament_id')) {
-            $query->where('tournament_id', $request->tournament_id);
+        if ($request->filled('tournament_id')) {
+            $query->whereHas('category', fn ($category) =>
+                $category->where('tournament_id', $request->integer('tournament_id'))
+            );
         }
 
-        if ($request->has('stage')) {
-            $query->where('stage', $request->stage);
+        if ($request->filled('category_id')) {
+            $query->where('category_id', $request->integer('category_id'));
+        }
+
+        if ($request->filled('round')) {
+            $query->where('round', $this->tournamentService->normalizeRound((string) $request->input('round')));
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', (string) $request->input('status'));
         }
 
         return response()->json([
-            'matches' => $query->orderBy('scheduled_at')->get()
+            'matches' => $query
+                ->orderBy('category_id')
+                ->orderBy('bracket_order')
+                ->orderBy('match_date')
+                ->get()
+                ->map(fn (MatchTournament $match) => $this->tournamentService->matchPayload($match)),
         ]);
     }
 
-    public function show($id)
+    public function show(int $id)
     {
         $match = MatchTournament::with([
-            'team1.player1', 'team1.player2',
-            'team2.player1', 'team2.player2',
-            'winner',
-            'tournament'
+            'category',
+            'teamA.members.player.user',
+            'teamB.members.player.user',
+            'winner.members.player.user',
         ])->findOrFail($id);
 
         return response()->json([
-            'match' => $match
+            'match' => $this->tournamentService->matchPayload($match),
         ]);
     }
 
-    public function bracket($tournamentId)
+    public function bracket(int $tournamentId, Request $request)
     {
-        $stages = ['r16', 'qf', 'sf', 'final'];
-        $bracket = [];
+        $query = MatchTournament::with([
+            'category',
+            'teamA.members.player.user',
+            'teamB.members.player.user',
+            'winner.members.player.user',
+        ])
+            ->whereHas('category', fn ($category) =>
+                $category->where('tournament_id', $tournamentId)
+            )
+            ->whereIn('round', TournamentService::KNOCKOUT_ROUNDS);
 
-        foreach ($stages as $stage) {
-            $bracket[$stage] = MatchTournament::with([
-                'team1.player1', 'team1.player2',
-                'team2.player1', 'team2.player2',
-                'winner'
-            ])
-            ->where('tournament_id', $tournamentId)
-            ->where('stage', $stage)
-            ->orderBy('scheduled_at')
-            ->get();
+        if ($request->filled('category_id')) {
+            $query->where('category_id', $request->integer('category_id'));
         }
 
-        return response()->json($bracket);
+        $matches = $query
+            ->orderBy('category_id')
+            ->orderBy('bracket_order')
+            ->get()
+            ->groupBy('category_id')
+            ->map(function ($categoryMatches) {
+                return collect(TournamentService::KNOCKOUT_ROUNDS)
+                    ->mapWithKeys(function ($round) use ($categoryMatches) {
+                        return [
+                            $round => $categoryMatches
+                                ->filter(fn ($match) => $this->tournamentService->normalizeRound($match->round) === $round)
+                                ->map(fn ($match) => $this->tournamentService->matchPayload($match))
+                                ->values(),
+                        ];
+                    });
+            });
+
+        return response()->json([
+            'bracket' => $matches,
+        ]);
     }
 }

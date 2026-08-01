@@ -1,27 +1,23 @@
 <?php
 
-use App\Http\Controllers\Api\PlayerController;
+use App\Http\Controllers\Api\LeaderboardController;
 use App\Http\Controllers\Api\MatchController;
+use App\Http\Controllers\Api\PlayerController;
 use App\Http\Controllers\Api\TournamentController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\LeaderboardController;
 
-// Public API - No auth needed
 Route::prefix('v1')->group(function () {
-    // Players
-    Route::get('/players', [PlayerController::class, 'index']);
-    Route::get('/players/{id}', [PlayerController::class, 'show']);
     Route::get('/players/leaders', [PlayerController::class, 'leaders']);
+    Route::get('/players', [PlayerController::class, 'index']);
+    Route::get('/players/{id}', [PlayerController::class, 'show'])->whereNumber('id');
 
-    // Tournaments
-    Route::get('/tournaments', [TournamentController::class, 'index']);
-    Route::get('/tournaments/{id}', [TournamentController::class, 'show']);
     Route::get('/tournaments/history', [TournamentController::class, 'history']);
+    Route::get('/tournaments', [TournamentController::class, 'index']);
+    Route::get('/tournaments/{id}', [TournamentController::class, 'show'])->whereNumber('id');
 
-    // Matches
+    Route::get('/matches/bracket/{tournamentId}', [MatchController::class, 'bracket'])->whereNumber('tournamentId');
     Route::get('/matches', [MatchController::class, 'index']);
-    Route::get('/matches/{id}', [MatchController::class, 'show']);
-    Route::get('/matches/bracket/{tournamentId}', [MatchController::class, 'bracket']);
+    Route::get('/matches/{id}', [MatchController::class, 'show'])->whereNumber('id');
 
     Route::get('/leaderboard', [LeaderboardController::class, 'index']);
 });

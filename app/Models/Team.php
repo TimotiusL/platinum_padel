@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Team extends Model
 {
+    protected $table = 'teams';
+
     protected $fillable = [
         'category_id',
         'group_code',
@@ -14,15 +16,29 @@ class Team extends Model
         'team_name',
         'payment_status',
         'status',
-        'approved_at'
+        'approved_at',
+        'played',
+        'win',
+        'lose',
+        'points',
+        'score_for',
+        'score_against',
     ];
 
-    protected $table = 'teams';
+    protected $casts = [
+        'approved_at' => 'datetime',
+        'played' => 'integer',
+        'win' => 'integer',
+        'lose' => 'integer',
+        'points' => 'integer',
+        'score_for' => 'integer',
+        'score_against' => 'integer',
+    ];
 
     public function members()
-{
-    return $this->hasMany(TeamMember::class, 'team_id');
-}
+    {
+        return $this->hasMany(TeamMember::class, 'team_id');
+    }
 
     public function captain()
     {
@@ -30,7 +46,17 @@ class Team extends Model
     }
 
     public function category()
-{
-    return $this->belongsTo(Category::class);
-}
+    {
+        return $this->belongsTo(Category::class);
+    }
+
+    public function matchesAsTeamA()
+    {
+        return $this->hasMany(MatchTournament::class, 'team_a_id');
+    }
+
+    public function matchesAsTeamB()
+    {
+        return $this->hasMany(MatchTournament::class, 'team_b_id');
+    }
 }

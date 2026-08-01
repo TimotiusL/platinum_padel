@@ -14,6 +14,7 @@ class MatchTournament extends Model
         'team_b_id',
         'winner_team_id',
         'round',
+        'bracket_order',
         'court',
         'match_date',
         'status',
@@ -23,6 +24,7 @@ class MatchTournament extends Model
 
     protected $casts = [
         'match_date' => 'datetime',
+        'bracket_order' => 'integer',
         'score_team_a' => 'integer',
         'score_team_b' => 'integer',
     ];

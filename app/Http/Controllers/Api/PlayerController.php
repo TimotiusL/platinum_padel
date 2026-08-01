@@ -8,51 +8,83 @@ use Illuminate\Http\Request;
 
 class PlayerController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $limit = min(max($request->integer('limit', 100), 1), 500);
+
         $players = Player::with('user')
             ->orderByDesc('ranking_point')
+            ->limit($limit)
             ->get()
-            ->map(function ($p) {
+            ->map(function (Player $player, int $index) {
                 return [
-                    'id' => $p->id,
-                    'name' => $p->user->name,
-                    'location' => $p->city,
-                    'rank' => $p->ranking_point,
+                    'id' => $player->id,
+                    'name' => $player->user?->name ?? 'Unknown',
+                    'location' => $player->city,
+                    'rank' => $index + 1,
+                    'ranking_point' => (int) $player->ranking_point,
                     'titles' => 0,
-                    'photo' => $p->photo,
+                    'photo' => $player->photo,
                 ];
             });
 
         return response()->json([
-            'players' => $players
+            'players' => $players,
         ]);
     }
 
-    public function show($id)
+    public function show(int $id)
     {
-        $player = Player::with(['teams'])->findOrFail($id);
+        $player = Player::with([
+            'user',
+            'teams.members.player.user',
+        ])->findOrFail($id);
+
         return response()->json([
-            'player' => $player,
-            'profile' => $player->profile_data ?? $this->getDefaultProfile()
+            'player' => [
+                'id' => $player->id,
+                'name' => $player->user?->name ?? 'Unknown',
+                'location' => $player->city,
+                'ranking_point' => (int) $player->ranking_point,
+                'photo' => $player->photo,
+                'teams' => $player->teams,
+            ],
+            'profile' => $this->getDefaultProfile($player),
         ]);
     }
 
-    public function leaders()
+    public function leaders(Request $request)
     {
-        dd('MASUK');
+        $limit = min(max($request->integer('limit', 6), 1), 50);
+
+        $players = Player::with('user')
+            ->orderByDesc('ranking_point')
+            ->limit($limit)
+            ->get()
+            ->map(fn (Player $player) => [
+                'id' => $player->id,
+                'name' => $player->user?->name ?? 'Unknown',
+                'rank' => (int) $player->ranking_point,
+                'ranking_point' => (int) $player->ranking_point,
+                'titles' => 0,
+                'photo' => $player->photo,
+            ]);
+
+        return response()->json([
+            'players' => $players,
+        ]);
     }
 
-    private function getDefaultProfile()
+    private function getDefaultProfile(Player $player): array
     {
         return [
-            'name' => 'Player',
+            'name' => $player->user?->name ?? 'Player',
             'main' => 0,
             'menang' => 0,
             'winrate' => 0,
             'juara' => 0,
             'years' => [],
-            'history' => []
+            'history' => [],
         ];
     }
 }
