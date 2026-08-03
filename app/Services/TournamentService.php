@@ -8,6 +8,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\ValidationException;
+use App\Models\MatchSet;
 
 class TournamentService
 {
@@ -49,7 +50,9 @@ class TournamentService
     {
         $teamA = $this->teamPayload($match->teamA);
         $teamB = $this->teamPayload($match->teamB);
-
+        $sets = MatchSet::where('match_id', $match->id)
+            ->orderBy('set_number')
+            ->get();
         return [
             'id' => $match->id,
             'category_id' => $match->category_id,
@@ -59,8 +62,16 @@ class TournamentService
             'winner_id' => $match->winner_team_id,
             'team1' => $teamA,
             'team2' => $teamB,
-            'score1' => (int) $match->score_team_a,
-            'score2' => (int) $match->score_team_b,
+            'score1' => $sets->sum('score_team_a'),
+            'score2' => $sets->sum('score_team_b'),
+
+            'sets' => $sets->map(function ($set) {
+                return [
+                    'set' => $set->set_number,
+                    'score1' => $set->score_team_a,
+                    'score2' => $set->score_team_b,
+                ];
+            })->values(),
             'round' => $this->normalizeRound($match->round),
             'stage' => $this->normalizeRound($match->round),
             'bracket_order' => (int) ($match->bracket_order ?? 0),
@@ -106,7 +117,7 @@ class TournamentService
                 'group_code' => $team->group_code,
                 'players' => $team->members
                     ->sortByDesc('is_captain')
-                    ->map(fn ($member) => $member->player?->user?->name ?? '?')
+                    ->map(fn($member) => $member->player?->user?->name ?? '?')
                     ->values()
                     ->all(),
                 'played' => 0,

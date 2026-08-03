@@ -266,9 +266,9 @@ function tournamentCard(t) {
                 <div class="meta-row">${ICONS.pin} ${t.location}</div>
             </div>
             <div class="tags">${tags
-                .slice(0, 3)
-                .map((tag) => `<span class="tag">${tag}</span>`)
-                .join("")}</div>
+            .slice(0, 3)
+            .map((tag) => `<span class="tag">${tag}</span>`)
+            .join("")}</div>
         </div>
     </a>`;
 }
@@ -384,14 +384,14 @@ function viewTournaments() {
         </div>
         <div class="f-grid">
             ${FINALISTS.map(
-                (f) => `
+        (f) => `
                 <div class="f-card">
                     <div class="avatar">${f.initials}<span class="crown">${ICONS.crown}</span></div>
                     <div class="pname">${f.name}</div>
                     <div class="pill">${ICONS.trophy} Juara</div>
                     <div class="tname">${f.tname}</div>
                 </div>`,
-            ).join("")}
+    ).join("")}
         </div>
     </section>
 
@@ -402,7 +402,7 @@ function viewTournaments() {
         </div>
         <div class="h-grid">
             ${HISTORY.map(
-                (h) => `
+        (h) => `
                 <div class="t-card">
                     <div class="poster" style="background:linear-gradient(160deg,#173a2e,#0c1e17);">
                         <span class="badge">${h.badge || "PLATINUM SOCIETAS"}</span>
@@ -417,7 +417,7 @@ function viewTournaments() {
                         <div class="tags">${(h.tags || []).map((t) => `<span class="tag">${t}</span>`).join("")}</div>
                     </div>
                 </div>`,
-            ).join("")}
+    ).join("")}
         </div>
     </section>`;
 }
@@ -516,11 +516,11 @@ function renderResults(isFixture = false) {
     </div>
 
     ${[
-        ["r16", "Round of 16", "ROUND OF 16"],
-        ["qf", "Quarter Final", "QUARTER FINAL"],
-        ["sf", "Semi Final", "SEMI FINAL"],
-        ["final", "Final", "FINAL"],
-    ].map(([key, title, label]) => `
+            ["r16", "Round of 16", "ROUND OF 16"],
+            ["qf", "Quarter Final", "QUARTER FINAL"],
+            ["sf", "Semi Final", "SEMI FINAL"],
+            ["final", "Final", "FINAL"],
+        ].map(([key, title, label]) => `
         <div class="acc" data-acc="${key}">
             <div class="acc-head" onclick="toggleAcc(this.parentElement)">
                 <span>${title}</span>
@@ -567,8 +567,8 @@ function bracketColumn(title, matches) {
         <div class="eyebrow dim" style="margin-bottom:14px; text-align:center;">${title}</div>
         <div style="display:flex; flex-direction:column; gap:36px; justify-content:center; height:100%;">
             ${matches
-                .map(
-                    (m) => `
+            .map(
+                (m) => `
                 <div class="m-card" style="max-width:260px; margin:0 auto;">
                     <div class="m-team ${m.winner_id === m.team1_id ? "winner" : ""}">
                         <div class="names" style="font-size:14px;">${m.team1?.player1?.name || "?"}<br>${m.team1?.player2?.name || "?"}</div>
@@ -580,8 +580,8 @@ function bracketColumn(title, matches) {
                         <div class="score" style="font-size:18px;">${m.score2 ?? "-"}</div>
                     </div>
                 </div>`,
-                )
-                .join("")}
+            )
+            .join("")}
         </div>
     </div>`;
 }
@@ -616,9 +616,7 @@ async function viewMatchDetail(id) {
         ? [m.team2.player1?.name || "?", m.team2.player2?.name || "?"]
         : ["?", "?"];
 
-    const scoreHistory = m.score_history || [
-        { score: `${m.score1 || 0}-${m.score2 || 0}`, time: "00.00.00" },
-    ];
+    const sets = m.sets || [];
 
     return `
     <a class="back-link" href="#/tournament/${m.tournament_id}">${ICONS.back} Kembali ke Detail Turnamen</a>
@@ -673,17 +671,30 @@ async function viewMatchDetail(id) {
     </div>
 
     <div class="history-card">
-        <div class="eyebrow dim" style="padding:18px 22px 0;">Riwayat Skor</div>
-        ${scoreHistory
-            .map(
-                (h) => `
-            <div class="history-item">
-                <span class="score">${h.score} <span style="font-family:var(--ui); font-size:10px; color:var(--cream-faint); text-transform:uppercase; margin-left:8px;">Set 1</span></span>
-                <span class="time">Pembaruan Skor · ${h.time}</span>
-            </div>`,
-            )
-            .join("")}
+    <div class="eyebrow dim" style="padding:18px 22px 0;">
+        Hasil Set
     </div>
+
+    ${sets.length
+            ? sets.map(set => `
+            <div class="history-item">
+                <div>
+                    <strong>Set ${set.set}</strong><br>
+                    <small>${team1Names.join(" / ")}</small>
+                </div>
+
+                <div class="score">
+                    ${set.score1} - ${set.score2}
+                </div>
+
+                <div>
+                    <small>${team2Names.join(" / ")}</small>
+                </div>
+            </div>
+        `).join("")
+            : `<div class="history-item">Belum ada set dimainkan.</div>`
+        }
+</div>
     `;
 }
 
@@ -718,8 +729,8 @@ function teamGroupCard(team) {
         <div class="team-code"><small>Team</small><strong>${team.code}</strong></div>
         <div class="team-player-list">
             ${players
-                .map(
-                    (name, index) => `
+            .map(
+                (name, index) => `
                 <div class="team-player-item">
                     <div class="avatar">${getInitials(name)}</div>
                     <div class="team-player-copy">
@@ -727,8 +738,8 @@ function teamGroupCard(team) {
                         <div class="role">Pemain ${index + 1}</div>
                     </div>
                 </div>`,
-                )
-                .join("")}
+            )
+            .join("")}
         </div>
         <div class="team-player-count">2 Pemain</div>
     </article>`;
@@ -821,14 +832,13 @@ async function viewPlayerProfile(id) {
         <div class="stat-box"><div class="num">${ICONS.trophy} ${p.titles || 0}</div><div class="lbl">Juara</div></div>
     </div>
 
-    ${
-        years.length > 0
+    ${years.length > 0
             ? `
     <div class="section" style="margin-top:44px;">
         <div class="eyebrow" style="margin-bottom:16px;">${ICONS.calendar} Statistik Per Tahun</div>
         ${years
-            .map(
-                (y) => `
+                .map(
+                    (y) => `
             <div class="year-card">
                 <div class="year-top"><span>${y.year}</span><span class="wr">${y.menang}/${y.main} menang</span></div>
                 <div class="bar"><div class="bar-fill" style="width:${y.main > 0 ? Math.round((y.menang / y.main) * 100) : 0}%;"></div></div>
@@ -839,14 +849,13 @@ async function viewPlayerProfile(id) {
                     <span style="color:var(--gold-light);">${ICONS.trophy} ${y.juara || 0} juara</span>
                 </div>
             </div>`,
-            )
-            .join("")}
+                )
+                .join("")}
     </div>`
             : ""
-    }
+        }
 
-    ${
-        history.length > 0
+    ${history.length > 0
             ? `
     <div class="section" style="margin-top:44px;">
         <div class="eyebrow" style="margin-bottom:16px;">${ICONS.trophy} Riwayat Turnamen</div>
@@ -863,7 +872,7 @@ async function viewPlayerProfile(id) {
         </div>
     </div>`
             : ""
-    }
+        }
     `;
 }
 
