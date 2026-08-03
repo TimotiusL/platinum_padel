@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Models\MatchSet;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\MatchTournament;
@@ -55,18 +56,57 @@ class ScoreboardController extends Controller
         $scoreA = (int) $data['score_team_a'];
         $scoreB = (int) $data['score_team_b'];
 
-        if ($request->has('finish')) {
-            $this->tournamentService->finishMatch($match, $scoreA, $scoreB);
-            $message = 'Pertandingan selesai, winner dan bracket sudah diperbarui.';
-        } else {
-            $match->update([
-                'score_team_a' => $scoreA,
-                'score_team_b' => $scoreB,
-                'status' => $match->status === 'scheduled' ? 'ongoing' : $match->status,
-            ]);
+        $currentSet = MatchSet::where('match_id', $match->id)
+            ->count() + 1;
 
-            $this->tournamentService->syncTeamStats($match->category_id);
-            $message = 'Score live berhasil diperbarui.';
+        $winner = null;
+
+        if ($scoreA > $scoreB) {
+            $winner = $match->team_a_id;
+        } elseif ($scoreB > $scoreA) {
+            $winner = $match->team_b_id;
+        }
+
+        MatchSet::create([
+            'match_id' => $match->id,
+            'set_number' => $currentSet,
+            'score_team_a' => $scoreA,
+            'score_team_b' => $scoreB,
+            'winner_team_id' => $winner,
+        ]);
+
+        $match->update([
+            'score_team_a' => 0,
+            'score_team_b' => 0,
+            'status' => 'ongoing',
+        ]);
+
+        $teamASet = MatchSet::where('match_id', $match->id)
+            ->where('winner_team_id', $match->team_a_id)
+            ->count();
+
+        $teamBSet = MatchSet::where('match_id', $match->id)
+            ->where('winner_team_id', $match->team_b_id)
+            ->count();
+
+        if ($teamASet == 2 || $teamBSet == 2) {
+
+            $finalScoreA = MatchSet::where('match_id', $match->id)
+                ->sum('score_team_a');
+
+            $finalScoreB = MatchSet::where('match_id', $match->id)
+                ->sum('score_team_b');
+
+            $this->tournamentService->finishMatch(
+                $match,
+                $finalScoreA,
+                $finalScoreB
+            );
+
+            $message = 'Match selesai.';
+        } else {
+
+            $message = 'Set berhasil disimpan.';
         }
 
         return redirect()

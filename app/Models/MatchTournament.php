@@ -48,4 +48,9 @@ class MatchTournament extends Model
     {
         return $this->belongsTo(Team::class, 'winner_team_id');
     }
+    public function sets()
+    {
+        return $this->hasMany(MatchSet::class, 'match_id')
+            ->orderBy('set_number');
+    }
 }
